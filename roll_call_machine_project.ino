@@ -33,7 +33,7 @@ void loop ()
     {
         LINE.notify ( "Obstacle detected    " );
         sensors.requestTemperatures ();
-        Serial.println ( sensors.getTempCByIndex ( 0 ) );
+        LINE.notify ( sensors.getTempCByIndex ( 0 ) );
     
     }
     

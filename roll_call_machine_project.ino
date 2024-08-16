@@ -31,9 +31,9 @@ void setup ()
   sensors.begin ();
 
   //呼叫設定副程式
-  wifi_setup ();
-  line_setup ();
-  lcd_setup ();
+  wifiSetup ();
+  lineSetup ();
+  lcdSetup ();
 }
 
 void loop ()
@@ -44,22 +44,28 @@ void loop ()
     //偵測到物件
     if ( L == 0 )
     {
+        //溫度感測器數值請求
+        sensors.requestTemperatures ();
+
         LINE.notify ( "Obstacle detected" );
-        sensors.requestTemperatures (); //IR數值請求
         LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
+
+        lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
     
     }
     
     else
     {
         LINE.notify ( "=== All clear" );
+
+        lcdUndetectedPrint ();
     }
 
-    delay(100);
+    delay ( 1000 );
 }
 
 //網路設定
-void wifi_setup ()
+void wifiSetup ()
 {
     WiFi.mode ( WIFI_STA );
     WiFi.begin ( ssid, password );
@@ -78,13 +84,14 @@ void wifi_setup ()
 }
 
 //Line Notify設定
-void line_setup ()
+void lineSetup ()
 {
     LINE.setToken ( LINE_TOKEN );
     LINE.notify ( "Line Notify Link Confirm." );
 }
 
-void lcd_setup ()
+//LCD I2C設定
+void lcdSetup ()
 {
     lcd.init ();
     lcd.backlight ();
@@ -92,4 +99,23 @@ void lcd_setup ()
     lcd.print ( "LCD Ready" );
     delay ( 3000 );
     lcd.clear ();
+}
+
+//LCD輸出(偵測到物件:是)
+void lcdDetectedPrint ( int temp )
+{
+    lcd.clear ();
+    lcd.setCursor ( 0, 0 );
+    lcd.print ( "Detected" );
+
+    lcd.setCursor ( 0, 1 );
+    lcd.print ( temp );
+}
+
+//LCD輸出(偵測到物件:否)
+void lcdUndetectedPrint ()
+{
+    lcd.clear ();
+    lcd.setCursor ( 0, 0 );
+    lcd.print ( "=== All clear" );
 }

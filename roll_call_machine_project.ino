@@ -1,98 +1,195 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <TridentTD_LineNotify.h>
-#include <OneWire.h> 
-#include <DallasTemperature.h> 
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <Adafruit_Fingerprint.h>
 
+// Pin Definitions
 #define irSensorPin 2
 #define tempSensorPin 4
 #define LINE_TOKEN "Y3nL5gLv1Q7UiDshiv2rPZAXc4jbouEqzt04HmilnZo"
 
+// WiFi Credentials
 const char* ssid     = "When Can My Internet Get Better";
 const char* password = "O00O00O0";
 
-OneWire oneWire ( tempSensorPin );
-DallasTemperature sensors ( &oneWire );
+// Temperature Sensor Setup
+OneWire oneWire(tempSensorPin);
+DallasTemperature sensors(&oneWire);
 
-void setup ()
+// Fingerprint Sensor Setup
+HardwareSerial mySerial(2);
+Adafruit_Fingerprint finger(&mySerial);
+
+void setup()
 {
-  Serial.begin ( 115200 );
+  Serial.begin(115200);
+  pinMode(irSensorPin, INPUT_PULLUP);
 
-  pinMode ( irSensorPin, INPUT_PULLUP );
-  sensors.begin ();
-
-  wifi_setup ();
-  line_setup ();
+  // Initialize Sensors
+  sensors.begin();
+  wifi_setup();
+  line_setup();
+  fingerprint_setup();
 }
 
-void loop ()
+void loop()
 {
-    int L = digitalRead ( irSensorPin );
-  
-    if ( L == 0 )
-    {
-        LINE.notify ( "Obstacle detected    " );
-        sensors.requestTemperatures ();
-        LINE.notify ( sensors.getTempCByIndex ( 0 ) );
-    
-    }
-    
-    else
-    {
-        LINE.notify ( "=== All clear" );
-    }
+  checkIRSensorAndSendData();
+  int fingerprintID = getFingerprintID();
 
-    delay(100);
+  // 如果识别到指纹，发送指纹ID和信心指数到Line Notify
+  if (fingerprintID >= 0) {
+    LINE.notify("Fingerprint ID: " + String(fingerprintID) + 
+                ", Confidence: " + String(finger.confidence));
+  }
+
+  delay(100);
 }
 
-void wifi_setup ()
+void wifi_setup()
 {
-    WiFi.mode ( WIFI_STA );
-    WiFi.begin ( ssid, password );
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
 
-    while ( WiFi.status () != WL_CONNECTED )
-    {
-      Serial.print ( "." );
-      delay ( 500 );
-    }
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(500);
+  }
 
-    Serial.println ( "" );
-    Serial.print ( "Connected to " );
-    Serial.println ( ssid );
-    Serial.print ( "IP address: " );
-    Serial.println ( WiFi.localIP () );
+  Serial.println("\nConnected to WiFi");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
-void line_setup ()
+void line_setup()
 {
-    LINE.setToken ( LINE_TOKEN );
-    LINE.notify ( "Line Notify Link Confirm." );
+  LINE.setToken(LINE_TOKEN);
+  LINE.notify("Line Notify Link Confirm.");
 }
 
-/*
-Sketch 使用 1008329 位元組（76%）的程式儲存空間。最大為 1310720 位元組
-全域變數使用 45364 位元組 (13%) 的動態記憶體, 保留 282316 位元組給區域變數. 最大 327680 位元組
-esptool.py v4.6
-Serial port COM8
-Connecting.........Traceback (most recent call last):
-  File "esptool.py", line 37, in <module>
-  File "esptool\__init__.py", line 1064, in _main
-  File "esptool\__init__.py", line 859, in main
-  File "esptool\cmds.py", line 466, in write_flash
-  File "esptool\util.py", line 37, in flash_size_bytes
-TypeError: argument of type 'NoneType' is not iterable
+void checkIRSensorAndSendData() {
+  int L = digitalRead(irSensorPin);
+  sensors.requestTemperatures();
+  float tempC = sensors.getTempCByIndex(0);
 
-Chip is ESP32-D0WD-V3 (revision v3.1)
-Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
-Crystal is 40MHz
-MAC: ec:64:c9:5d:60:60
-Uploading stub...
-Running stub...
-Stub running...
-Changing baud rate to 921600
-Changed.
-WARNING: Failed to communicate with the flash chip, read/write operations will fail. Try checking the chip connections or removing any other hardware connected to IOs.
-Configuring flash size...
-[10508] Failed to execute script 'esptool' due to unhandled exception!
-上傳失敗: 上傳錯誤: exit status 1
-*/
+  if (L == 0) {
+    LINE.notify("Obstacle detected");
+    LINE.notify("Temperature: " + String(tempC) + " °C");
+  } else {
+    LINE.notify("=== All clear");
+    LINE.notify("Temperature: " + String(tempC) + " °C");
+  }
+}
+
+void fingerprint_setup()
+{
+  mySerial.begin(57600, SERIAL_8N1, 16, 17);
+  finger.begin(57600);
+  delay(5);
+
+  if (finger.verifyPassword())
+  {
+    Serial.println("Found fingerprint sensor!");
+  }
+  else
+  {
+    Serial.println("Did not find fingerprint sensor :(");
+    while (1) { delay(1); }
+  }
+
+  Serial.println("Reading sensor parameters");
+  finger.getParameters();
+  Serial.print("Status: 0x"); Serial.println(finger.status_reg, HEX);
+  Serial.print("Sys ID: 0x"); Serial.println(finger.system_id, HEX);
+  Serial.print("Capacity: "); Serial.println(finger.capacity);
+  Serial.print("Security level: "); Serial.println(finger.security_level);
+  Serial.print("Device address: "); Serial.println(finger.device_addr, HEX);
+  Serial.print("Packet len: "); Serial.println(finger.packet_len);
+  Serial.print("Baud rate: "); Serial.println(finger.baud_rate);
+
+  finger.getTemplateCount();
+
+  if (finger.templateCount == 0)
+  {
+    Serial.println("Sensor doesn't contain any fingerprint data.");
+  }
+  else
+  {
+    Serial.print("Sensor contains "); 
+    Serial.print(finger.templateCount); 
+    Serial.println(" templates");
+  }
+}
+
+uint8_t getFingerprintID()
+{
+  uint8_t p = finger.getImage();
+  switch (p)
+  {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.println("No finger detected");
+      return -1;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return -1;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      return -1;
+    default:
+      Serial.println("Unknown error");
+      return -1;
+  }
+
+  p = finger.image2Tz();
+  switch (p)
+  {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return -1;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return -1;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return -1;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return -1;
+    default:
+      Serial.println("Unknown error");
+      return -1;
+  }
+
+  p = finger.fingerSearch();
+  if (p == FINGERPRINT_OK)
+  {
+    Serial.println("Found a print match!");
+    Serial.print("Found ID #"); Serial.print(finger.fingerID);
+    Serial.print(" with confidence of "); Serial.println(finger.confidence);
+    return finger.fingerID;
+  }
+  else if (p == FINGERPRINT_PACKETRECIEVEERR)
+  {
+    Serial.println("Communication error");
+    return -1;
+  }
+  else if (p == FINGERPRINT_NOTFOUND)
+  {
+    Serial.println("Did not find a match");
+    return -1;
+  }
+  else
+  {
+    Serial.println("Unknown error");
+    return -1;
+  }
+}

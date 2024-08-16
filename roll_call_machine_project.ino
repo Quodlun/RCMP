@@ -83,7 +83,7 @@ void wifiSetup ()
     Serial.println ( WiFi.localIP () );
 }
 
-//Line Notify設定
+//Line Notify設定 
 void lineSetup ()
 {
     LINE.setToken ( LINE_TOKEN );
@@ -102,7 +102,7 @@ void lcdSetup ()
 }
 
 //LCD輸出(偵測到物件:是)
-void lcdDetectedPrint ( int temp )
+void lcdDetectedPrint ( float temp )
 {
     lcd.clear ();
     lcd.setCursor ( 0, 0 );

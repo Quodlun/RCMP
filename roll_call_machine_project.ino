@@ -72,15 +72,16 @@ void wifiSetup ()
 
     while ( WiFi.status () != WL_CONNECTED )
     {
-      Serial.print ( "." );
       delay ( 500 );
     }
-
+/*
+    WiFi debug:
     Serial.println ( "" );
     Serial.print ( "Connected to " );
     Serial.println ( ssid );
     Serial.print ( "IP address: " );
     Serial.println ( WiFi.localIP () );
+*/
 }
 
 //Line Notify設定 

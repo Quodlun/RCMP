@@ -2,7 +2,9 @@
 #include <WiFiClient.h>
 #include <TridentTD_LineNotify.h>
 #include <OneWire.h> 
-#include <DallasTemperature.h> 
+#include <DallasTemperature.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 //接腳與Token定義
 #define irSensorPin 2
@@ -17,6 +19,9 @@ const char* password = "O00O00O0";
 OneWire oneWire ( tempSensorPin );
 DallasTemperature sensors ( &oneWire );
 
+//LCD Setup
+LiquidCrystal_I2C lcd ( 0x27, 16, 2 );
+
 void setup ()
 {
   //距離setup
@@ -28,6 +33,7 @@ void setup ()
   //呼叫設定副程式
   wifi_setup ();
   line_setup ();
+  lcd_setup ();
 }
 
 void loop ()
@@ -76,4 +82,14 @@ void line_setup ()
 {
     LINE.setToken ( LINE_TOKEN );
     LINE.notify ( "Line Notify Link Confirm." );
+}
+
+void lcd_setup ()
+{
+    lcd.init ();
+    lcd.backlight ();
+
+    lcd.print ( "LCD Ready" );
+    delay ( 3000 );
+    lcd.clear ();
 }

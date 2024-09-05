@@ -6,15 +6,11 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <time.h>
+#include "extern_variable.h"
 
 //接腳與Token定義
 #define irSensorPin 16
 #define tempSensorPin 4
-#define LINE_TOKEN "Y3nL5gLv1Q7UiDshiv2rPZAXc4jbouEqzt04HmilnZo"
-
-//網路連線內容
-const char* ssid     = "When Can My Internet Get Better";
-const char* password = "O00O00O0";
 
 //RTC時間設定
 const char* ntpServer = "time.google.com";
@@ -45,6 +41,8 @@ void setup ()
 
 void loop ()
 {
+    printLocalTime ();
+    
     //IR讀取數值變數
     int L = digitalRead ( irSensorPin );
 
@@ -137,10 +135,19 @@ void lcdUndetectedPrint ()
 void printLocalTime ()
 {
     struct tm timeinfo;
+
     if ( !getLocalTime ( &timeinfo ) )
     {
-        Serial.println("Failed to obtain time");
+        Serial.println ( "Failed to obtain time." );
     }
-
-    Serial.println ( String ( ( &timeinfo, "%m/%d %H:%M:%S" ) ) );
+    
+    Serial.println ( &timeinfo, "%m/%d %H:%M:%S" );
 }
+
+/*
+  - Change time.h to NTPClient.h
+  - https://atceiling.blogspot.com/2019/07/arduino47-ntp.html
+  - This better work
+  - I'm going to sleep
+  - Fuck this
+*/

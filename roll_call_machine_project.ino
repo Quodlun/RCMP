@@ -8,7 +8,7 @@
 #include <time.h>
 
 //接腳與Token定義
-#define irSensorPin 2
+#define irSensorPin 16
 #define tempSensorPin 4
 #define LINE_TOKEN "Y3nL5gLv1Q7UiDshiv2rPZAXc4jbouEqzt04HmilnZo"
 
@@ -40,7 +40,7 @@ void setup ()
   wifiSetup ();
   lineSetup ();
   lcdSetup ();
-  timeSetup ()
+  timeSetup ();
 }
 
 void loop ()
@@ -56,7 +56,7 @@ void loop ()
 
         LINE.notify ( "Obstacle detected" );
         LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
-        printLocalTime ()
+        printLocalTime ();
 
         lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
     
@@ -112,8 +112,7 @@ void lcdSetup ()
 
 void timeSetup ()
 {
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-    printLocalTime();
+    configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
 }
 
 //LCD輸出(偵測到物件:是)
@@ -143,5 +142,5 @@ void printLocalTime ()
         Serial.println("Failed to obtain time");
     }
 
-    LINE.notify ( &timeinfo, "%m/%d %H:%M:%S" );
+    Serial.println ( String ( ( &timeinfo, "%m/%d %H:%M:%S" ) ) );
 }

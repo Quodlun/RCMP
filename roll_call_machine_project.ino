@@ -5,15 +5,18 @@
 #include <DallasTemperature.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <time.h>
+#include "extern_variable.h"
 
 //接腳與Token定義
-#define irSensorPin 2
+#define irSensorPin 16
 #define tempSensorPin 4
-#define LINE_TOKEN "Y3nL5gLv1Q7UiDshiv2rPZAXc4jbouEqzt04HmilnZo"
 
-//網路連線內容
-const char* ssid     = "When Can My Internet Get Better";
-const char* password = "O00O00O0";
+//RTC時間設定
+const char* ntpServer = "time.google.com";
+const long  gmtOffset_sec = 28800;
+const int   daylightOffset_sec = 0;
+char timeResult [ 20 ];
 
 //溫度setup
 OneWire oneWire ( tempSensorPin );
@@ -27,6 +30,7 @@ void setup ()
   //距離setup
   Serial.begin ( 115200 );
 
+  //接角及感測器設定
   pinMode ( irSensorPin, INPUT_PULLUP );
   sensors.begin ();
 
@@ -34,89 +38,120 @@ void setup ()
   wifiSetup ();
   lineSetup ();
   lcdSetup ();
+  timeSetup ();
 }
 
 void loop ()
-{
-    //IR讀取數值變數
-    int L = digitalRead ( irSensorPin );
+{  
+  //IR讀取數值變數
+  int L = digitalRead ( irSensorPin );
 
-    //偵測到物件
-    if ( L == 0 )
-    {
-        //溫度感測器數值請求
-        sensors.requestTemperatures ();
+  //偵測到物件
+  if ( L == 0 )
+  {
+    //溫度感測器數值請求
+    sensors.requestTemperatures ();
 
-        LINE.notify ( "Obstacle detected" );
-        LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
+    //溫度讀取數值輸出
+    LINE.notify ( "Obstacle detected" );
+    LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
+    lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
 
-        lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
-    
-    }
-    
-    else
-    {
-        LINE.notify ( "=== All clear" );
+    //NTP輸出
+    delay ( 500 );
+    localTime ();
+    lcdTimePrint ();
+    LINE.notify ( timeResult );
+  }
+  
+  else
+  {
+    //無偵測數值輸出
+    LINE.notify ( "=== All clear" );
+    lcdUndetectedPrint ();
+  }
 
-        lcdUndetectedPrint ();
-    }
-
-    delay ( 1000 );
+  delay ( 1000 );
 }
 
 //網路設定
 void wifiSetup ()
 {
-    WiFi.mode ( WIFI_STA );
-    WiFi.begin ( ssid, password );
+  WiFi.mode ( WIFI_STA );
+  WiFi.begin ( ssid, password );
 
-    while ( WiFi.status () != WL_CONNECTED )
-    {
-      delay ( 500 );
-    }
-/*
-    WiFi debug:
-    Serial.println ( "" );
-    Serial.print ( "Connected to " );
-    Serial.println ( ssid );
-    Serial.print ( "IP address: " );
-    Serial.println ( WiFi.localIP () );
-*/
+  while ( WiFi.status () != WL_CONNECTED )
+  {
+    delay ( 500 );
+  }
 }
 
 //Line Notify設定 
 void lineSetup ()
 {
-    LINE.setToken ( LINE_TOKEN );
-    LINE.notify ( "Line Notify Link Confirm." );
+  LINE.setToken ( LINE_TOKEN );
+  LINE.notify ( "Line Notify Link Confirm." );
 }
 
 //LCD I2C設定
 void lcdSetup ()
 {
-    lcd.init ();
-    lcd.backlight ();
+  lcd.init ();
+  lcd.backlight ();
 
-    lcd.print ( "LCD Ready" );
-    delay ( 3000 );
-    lcd.clear ();
+  lcd.print ( "LCD Ready" );
+  delay ( 3000 );
+  lcd.clear ();
 }
 
-//LCD輸出(偵測到物件:是)
+//NTP 設定
+void timeSetup ()
+{
+  configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
+}
+
+//LCD 輸出(偵測到物件:是)
 void lcdDetectedPrint ( float temp )
 {
-    lcd.clear ();
-    lcd.setCursor ( 0, 0 );
-    lcd.print ( "Detected" );
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+  lcd.print ( "Detected" );
 
-    lcd.setCursor ( 0, 1 );
-    lcd.print ( temp );
+  lcd.setCursor ( 0, 1 );
+  lcd.print ( temp );
 }
 
-//LCD輸出(偵測到物件:否)
+//LCD 輸出(偵測到物件:否)
 void lcdUndetectedPrint ()
 {
     lcd.clear ();
     lcd.setCursor ( 0, 0 );
     lcd.print ( "=== All clear" );
+}
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+  lcd.print ( "=== All clear" );
+}
+
+//讀取及時時間
+void localTime ()
+{
+  time_t rawTime;
+  struct tm *info;
+ 
+  time( &rawTime );
+ 
+  info = localtime ( &rawTime );
+ 
+  strftime ( timeResult, sizeof ( timeResult ), "%Y-%m-%d %H:%M", info );
+}
+
+//LCD NTP 輸出
+void lcdTimePrint ()
+{
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+    
+  lcd.print ( timeResult );
+  lcd.setCursor ( 0, 1 );
 }

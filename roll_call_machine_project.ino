@@ -41,107 +41,107 @@ void setup ()
 
 void loop ()
 {
+  printLocalTime ();
+  
+  //IR讀取數值變數
+  int L = digitalRead ( irSensorPin );
+
+  //偵測到物件
+  if ( L == 0 )
+  {
+    //溫度感測器數值請求
+    sensors.requestTemperatures ();
+
+    LINE.notify ( "Obstacle detected" );
+    LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
     printLocalTime ();
-    
-    //IR讀取數值變數
-    int L = digitalRead ( irSensorPin );
 
-    //偵測到物件
-    if ( L == 0 )
-    {
-        //溫度感測器數值請求
-        sensors.requestTemperatures ();
+    lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
+  
+  }
+  
+  else
+  {
+    LINE.notify ( "=== All clear" );
 
-        LINE.notify ( "Obstacle detected" );
-        LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
-        printLocalTime ();
+    lcdUndetectedPrint ();
+  }
 
-        lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
-    
-    }
-    
-    else
-    {
-        LINE.notify ( "=== All clear" );
-
-        lcdUndetectedPrint ();
-    }
-
-    delay ( 1000 );
+  delay ( 1000 );
 }
 
 //網路設定
 void wifiSetup ()
 {
-    WiFi.mode ( WIFI_STA );
-    WiFi.begin ( ssid, password );
+  WiFi.mode ( WIFI_STA );
+  WiFi.begin ( ssid, password );
 
-    while ( WiFi.status () != WL_CONNECTED )
-    {
-      delay ( 500 );
-    }
-    /*
-    WiFi debug:
-    Serial.println ( "" );
-    Serial.print ( "Connected to " );
-    Serial.println ( ssid );
-    Serial.print ( "IP address: " );
-    Serial.println ( WiFi.localIP () );
-    */
+  while ( WiFi.status () != WL_CONNECTED )
+  {
+    delay ( 500 );
+  }
+  /*
+  WiFi debug:
+  Serial.println ( "" );
+  Serial.print ( "Connected to " );
+  Serial.println ( ssid );
+  Serial.print ( "IP address: " );
+  Serial.println ( WiFi.localIP () );
+  */
 }
 
 //Line Notify設定 
 void lineSetup ()
 {
-    LINE.setToken ( LINE_TOKEN );
-    LINE.notify ( "Line Notify Link Confirm." );
+  LINE.setToken ( LINE_TOKEN );
+  LINE.notify ( "Line Notify Link Confirm." );
 }
 
 //LCD I2C設定
 void lcdSetup ()
 {
-    lcd.init ();
-    lcd.backlight ();
+  lcd.init ();
+  lcd.backlight ();
 
-    lcd.print ( "LCD Ready" );
-    delay ( 3000 );
-    lcd.clear ();
+  lcd.print ( "LCD Ready" );
+  delay ( 3000 );
+  lcd.clear ();
 }
 
 void timeSetup ()
 {
-    configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
+  configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
 }
 
 //LCD輸出(偵測到物件:是)
 void lcdDetectedPrint ( float temp )
 {
-    lcd.clear ();
-    lcd.setCursor ( 0, 0 );
-    lcd.print ( "Detected" );
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+  lcd.print ( "Detected" );
 
-    lcd.setCursor ( 0, 1 );
-    lcd.print ( temp );
+  lcd.setCursor ( 0, 1 );
+  lcd.print ( temp );
 }
 
 //LCD輸出(偵測到物件:否)
 void lcdUndetectedPrint ()
 {
-    lcd.clear ();
-    lcd.setCursor ( 0, 0 );
-    lcd.print ( "=== All clear" );
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+  lcd.print ( "=== All clear" );
 }
 
 void printLocalTime ()
 {
-    time_t rawtime;
-    struct tm *info;
-    char buffer [ 80 ];
+  time_t rawtime;
+  struct tm *info;
+  char buffer [ 80 ];
  
-    time( &rawtime );
+  time( &rawtime );
  
-    info = localtime ( &rawtime );
+  info = localtime ( &rawtime );
  
-    strftime ( buffer, 80, "%Y-%m-%d %H:%M:%S", info );
-    LINE.notify ( buffer );
+  strftime ( buffer, 80, "%Y-%m-%d %H:%M:%S", info );
+  LINE.notify ( buffer );
 }

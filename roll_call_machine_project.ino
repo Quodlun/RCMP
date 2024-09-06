@@ -134,20 +134,14 @@ void lcdUndetectedPrint ()
 
 void printLocalTime ()
 {
-    struct tm timeinfo;
-
-    if ( !getLocalTime ( &timeinfo ) )
-    {
-        Serial.println ( "Failed to obtain time." );
-    }
-    
-    Serial.println ( &timeinfo, "%m/%d %H:%M:%S" );
+    time_t rawtime;
+    struct tm *info;
+    char buffer[80];
+ 
+    time( &rawtime );
+ 
+    info = localtime( &rawtime );
+ 
+    strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", info);
+    LINE.notify ( buffer );
 }
-
-/*
-  - Change time.h to NTPClient.h
-  - https://atceiling.blogspot.com/2019/07/arduino47-ntp.html
-  - This better work
-  - I'm going to sleep
-  - Fuck this
-*/

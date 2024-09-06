@@ -128,10 +128,6 @@ void lcdUndetectedPrint ()
     lcd.setCursor ( 0, 0 );
     lcd.print ( "=== All clear" );
 }
-  lcd.clear ();
-  lcd.setCursor ( 0, 0 );
-  lcd.print ( "=== All clear" );
-}
 
 //讀取及時時間
 void localTime ()

@@ -16,6 +16,7 @@
 const char* ntpServer = "time.google.com";
 const long  gmtOffset_sec = 28800;
 const int   daylightOffset_sec = 0;
+char timeResult [ 20 ];
 
 //溫度setup
 OneWire oneWire ( tempSensorPin );
@@ -29,6 +30,7 @@ void setup ()
   //距離setup
   Serial.begin ( 115200 );
 
+  //接角及感測器設定
   pinMode ( irSensorPin, INPUT_PULLUP );
   sensors.begin ();
 
@@ -40,9 +42,7 @@ void setup ()
 }
 
 void loop ()
-{
-  printLocalTime ();
-  
+{  
   //IR讀取數值變數
   int L = digitalRead ( irSensorPin );
 
@@ -52,18 +52,22 @@ void loop ()
     //溫度感測器數值請求
     sensors.requestTemperatures ();
 
+    //溫度讀取數值輸出
     LINE.notify ( "Obstacle detected" );
     LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
-    printLocalTime ();
-
     lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
-  
+
+    //NTP輸出
+    delay ( 500 );
+    localTime ();
+    lcdTimePrint ();
+    LINE.notify ( timeResult );
   }
   
   else
   {
+    //無偵測數值輸出
     LINE.notify ( "=== All clear" );
-
     lcdUndetectedPrint ();
   }
 
@@ -80,14 +84,6 @@ void wifiSetup ()
   {
     delay ( 500 );
   }
-  /*
-  WiFi debug:
-  Serial.println ( "" );
-  Serial.print ( "Connected to " );
-  Serial.println ( ssid );
-  Serial.print ( "IP address: " );
-  Serial.println ( WiFi.localIP () );
-  */
 }
 
 //Line Notify設定 
@@ -108,12 +104,13 @@ void lcdSetup ()
   lcd.clear ();
 }
 
+//NTP 設定
 void timeSetup ()
 {
   configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
 }
 
-//LCD輸出(偵測到物件:是)
+//LCD 輸出(偵測到物件:是)
 void lcdDetectedPrint ( float temp )
 {
   lcd.clear ();
@@ -124,7 +121,7 @@ void lcdDetectedPrint ( float temp )
   lcd.print ( temp );
 }
 
-//LCD輸出(偵測到物件:否)
+//LCD 輸出(偵測到物件:否)
 void lcdUndetectedPrint ()
 {
   lcd.clear ();
@@ -132,16 +129,25 @@ void lcdUndetectedPrint ()
   lcd.print ( "=== All clear" );
 }
 
-void printLocalTime ()
+//讀取及時時間
+void localTime ()
 {
-  time_t rawtime;
+  time_t rawTime;
   struct tm *info;
-  char buffer [ 80 ];
  
-  time( &rawtime );
+  time( &rawTime );
  
-  info = localtime ( &rawtime );
+  info = localtime ( &rawTime );
  
-  strftime ( buffer, 80, "%Y-%m-%d %H:%M:%S", info );
-  LINE.notify ( buffer );
+  strftime ( timeResult, sizeof ( timeResult ), "%Y-%m-%d %H:%M", info );
+}
+
+//LCD NTP 輸出
+void lcdTimePrint ()
+{
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+    
+  lcd.print ( timeResult );
+  lcd.setCursor ( 0, 1 );
 }

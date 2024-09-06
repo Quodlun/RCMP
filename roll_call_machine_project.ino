@@ -136,12 +136,12 @@ void printLocalTime ()
 {
     time_t rawtime;
     struct tm *info;
-    char buffer[80];
+    char buffer [ 80 ];
  
     time( &rawtime );
  
-    info = localtime( &rawtime );
+    info = localtime ( &rawtime );
  
-    strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", info);
+    strftime ( buffer, 80, "%Y-%m-%d %H:%M:%S", info );
     LINE.notify ( buffer );
 }

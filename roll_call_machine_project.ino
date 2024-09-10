@@ -1,195 +1,171 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <TridentTD_LineNotify.h>
-#include <OneWire.h>
+#include <OneWire.h> 
 #include <DallasTemperature.h>
-#include <Adafruit_Fingerprint.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <time.h>
+#include "extern_variable.h"
 
-// Pin Definitions
-#define irSensorPin 2
+//接腳與Token定義
+#define irSensorPin 16
 #define tempSensorPin 4
-#define LINE_TOKEN "Y3nL5gLv1Q7UiDshiv2rPZAXc4jbouEqzt04HmilnZo"
 
-// WiFi Credentials
-const char* ssid     = "When Can My Internet Get Better";
-const char* password = "O00O00O0";
+//RTC時間設定
+const char* ntpServer = "time.google.com";
+const long  gmtOffset_sec = 28800;
+const int   daylightOffset_sec = 0;
+char timeResult [ 20 ];
 
-// Temperature Sensor Setup
-OneWire oneWire(tempSensorPin);
-DallasTemperature sensors(&oneWire);
+//溫度setup
+OneWire oneWire ( tempSensorPin );
+DallasTemperature sensors ( &oneWire );
 
-// Fingerprint Sensor Setup
-HardwareSerial mySerial(2);
-Adafruit_Fingerprint finger(&mySerial);
+//LCD Setup
+LiquidCrystal_I2C lcd ( 0x27, 16, 2 );
 
-void setup()
+void setup ()
 {
-  Serial.begin(115200);
-  pinMode(irSensorPin, INPUT_PULLUP);
+  //距離setup
+  Serial.begin ( 115200 );
 
-  // Initialize Sensors
-  sensors.begin();
-  wifi_setup();
-  line_setup();
-  fingerprint_setup();
+  //接角及感測器設定
+  pinMode ( irSensorPin, INPUT_PULLUP );
+  sensors.begin ();
+
+  //呼叫設定副程式
+  wifiSetup ();
+  lineSetup ();
+  lcdSetup ();
+  timeSetup ();
+  checkFingerprintID();
 }
 
-void loop()
-{
-  checkIRSensorAndSendData();
-  int fingerprintID = getFingerprintID();
+void loop ()
+{  
+  //IR讀取數值變數
+  int L = digitalRead ( irSensorPin );
 
-  // 如果识别到指纹，发送指纹ID和信心指数到Line Notify
-  if (fingerprintID >= 0) {
-    LINE.notify("Fingerprint ID: " + String(fingerprintID) + 
-                ", Confidence: " + String(finger.confidence));
-  }
-
-  delay(100);
-}
-
-void wifi_setup()
-{
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED)
+  //偵測到物件
+  if ( L == 0 )
   {
-    Serial.print(".");
-    delay(500);
+    //溫度感測器數值請求
+    sensors.requestTemperatures ();
+
+    //溫度讀取數值輸出
+    LINE.notify ( "Obstacle detected" );
+    LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
+    lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
+
+    //NTP輸出
+    delay ( 500 );
+    localTime ();
+    lcdTimePrint ();
+    LINE.notify ( timeResult );
   }
-
-  Serial.println("\nConnected to WiFi");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-void line_setup()
-{
-  LINE.setToken(LINE_TOKEN);
-  LINE.notify("Line Notify Link Confirm.");
-}
-
-void checkIRSensorAndSendData() {
-  int L = digitalRead(irSensorPin);
-  sensors.requestTemperatures();
-  float tempC = sensors.getTempCByIndex(0);
-
-  if (L == 0) {
-    LINE.notify("Obstacle detected");
-    LINE.notify("Temperature: " + String(tempC) + " °C");
-  } else {
-    LINE.notify("=== All clear");
-    LINE.notify("Temperature: " + String(tempC) + " °C");
-  }
-}
-
-void fingerprint_setup()
-{
-  mySerial.begin(57600, SERIAL_8N1, 16, 17);
-  finger.begin(57600);
-  delay(5);
-
-  if (finger.verifyPassword())
-  {
-    Serial.println("Found fingerprint sensor!");
-  }
+  
   else
   {
-    Serial.println("Did not find fingerprint sensor :(");
-    while (1) { delay(1); }
+    //無偵測數值輸出
+    LINE.notify ( "=== All clear" );
+    lcdUndetectedPrint ();
   }
 
-  Serial.println("Reading sensor parameters");
-  finger.getParameters();
-  Serial.print("Status: 0x"); Serial.println(finger.status_reg, HEX);
-  Serial.print("Sys ID: 0x"); Serial.println(finger.system_id, HEX);
-  Serial.print("Capacity: "); Serial.println(finger.capacity);
-  Serial.print("Security level: "); Serial.println(finger.security_level);
-  Serial.print("Device address: "); Serial.println(finger.device_addr, HEX);
-  Serial.print("Packet len: "); Serial.println(finger.packet_len);
-  Serial.print("Baud rate: "); Serial.println(finger.baud_rate);
+  delay ( 1000 );
+}
 
-  finger.getTemplateCount();
+//網路設定
+void wifiSetup ()
+{
+  WiFi.mode ( WIFI_STA );
+  WiFi.begin ( ssid, password );
 
-  if (finger.templateCount == 0)
+  while ( WiFi.status () != WL_CONNECTED )
   {
-    Serial.println("Sensor doesn't contain any fingerprint data.");
-  }
-  else
-  {
-    Serial.print("Sensor contains "); 
-    Serial.print(finger.templateCount); 
-    Serial.println(" templates");
+    delay ( 500 );
   }
 }
 
-uint8_t getFingerprintID()
+//Line Notify設定 
+void lineSetup ()
 {
-  uint8_t p = finger.getImage();
-  switch (p)
-  {
-    case FINGERPRINT_OK:
-      Serial.println("Image taken");
-      break;
-    case FINGERPRINT_NOFINGER:
-      Serial.println("No finger detected");
-      return -1;
-    case FINGERPRINT_PACKETRECIEVEERR:
-      Serial.println("Communication error");
-      return -1;
-    case FINGERPRINT_IMAGEFAIL:
-      Serial.println("Imaging error");
-      return -1;
-    default:
-      Serial.println("Unknown error");
-      return -1;
-  }
+  LINE.setToken ( LINE_TOKEN );
+  LINE.notify ( "Line Notify Link Confirm." );
+}
 
-  p = finger.image2Tz();
-  switch (p)
-  {
-    case FINGERPRINT_OK:
-      Serial.println("Image converted");
-      break;
-    case FINGERPRINT_IMAGEMESS:
-      Serial.println("Image too messy");
-      return -1;
-    case FINGERPRINT_PACKETRECIEVEERR:
-      Serial.println("Communication error");
-      return -1;
-    case FINGERPRINT_FEATUREFAIL:
-      Serial.println("Could not find fingerprint features");
-      return -1;
-    case FINGERPRINT_INVALIDIMAGE:
-      Serial.println("Could not find fingerprint features");
-      return -1;
-    default:
-      Serial.println("Unknown error");
-      return -1;
-  }
+//LCD I2C設定
+void lcdSetup ()
+{
+  lcd.init ();
+  lcd.backlight ();
 
-  p = finger.fingerSearch();
-  if (p == FINGERPRINT_OK)
-  {
-    Serial.println("Found a print match!");
-    Serial.print("Found ID #"); Serial.print(finger.fingerID);
-    Serial.print(" with confidence of "); Serial.println(finger.confidence);
-    return finger.fingerID;
+  lcd.print ( "LCD Ready" );
+  delay ( 3000 );
+  lcd.clear ();
+}
+
+//NTP 設定
+void timeSetup ()
+{
+  configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
+}
+
+//LCD 輸出(偵測到物件:是)
+void lcdDetectedPrint ( float temp )
+{
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+  lcd.print ( "Detected" );
+
+  lcd.setCursor ( 0, 1 );
+  lcd.print ( temp );
+}
+
+//LCD 輸出(偵測到物件:否)
+void lcdUndetectedPrint ()
+{
+    lcd.clear ();
+    lcd.setCursor ( 0, 0 );
+    lcd.print ( "=== All clear" );
+}
+
+//讀取及時時間
+void localTime ()
+{
+  time_t rawTime;
+  struct tm *info;
+ 
+  time( &rawTime );
+ 
+  info = localtime ( &rawTime );
+ 
+  strftime ( timeResult, sizeof ( timeResult ), "%Y-%m-%d %H:%M", info );
+}
+
+//LCD NTP 輸出
+void lcdTimePrint ()
+{
+  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+    
+  lcd.print ( timeResult );
+  lcd.setCursor ( 0, 1 );
+}
+//指紋設定
+void checkFingerprintID() {
+  // 副程式，用來檢查指紋並更新全域變數 fingerprintID
+  if (finger.getImage() != FINGERPRINT_OK) {
+    fingerprintID = -1;
+    return;
   }
-  else if (p == FINGERPRINT_PACKETRECIEVEERR)
-  {
-    Serial.println("Communication error");
-    return -1;
+  if (finger.image2Tz() != FINGERPRINT_OK) {
+    fingerprintID = -1;
+    return;
   }
-  else if (p == FINGERPRINT_NOTFOUND)
-  {
-    Serial.println("Did not find a match");
-    return -1;
+  if (finger.fingerSearch() != FINGERPRINT_OK) {
+    fingerprintID = -1;
+    return;
   }
-  else
-  {
-    Serial.println("Unknown error");
-    return -1;
-  }
+  fingerprintID = finger.fingerID;
 }

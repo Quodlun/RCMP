@@ -8,22 +8,15 @@
 #include <time.h>
 #include "extern_variable.h"
 
-//接腳與Token定義
-#define irSensorPin 16
-#define tempSensorPin 4
-
-//RTC時間設定
-const char* ntpServer = "time.google.com";
-const long  gmtOffset_sec = 28800;
-const int   daylightOffset_sec = 0;
-char timeResult [ 20 ];
-
 //溫度setup
 OneWire oneWire ( tempSensorPin );
 DallasTemperature sensors ( &oneWire );
 
 //LCD Setup
 LiquidCrystal_I2C lcd ( 0x27, 16, 2 );
+
+//共用變數
+char timeResult [ 20 ];
 
 void setup ()
 {

@@ -34,7 +34,6 @@ void setup() {
 }
 
 void loop() {
-  checkIRSensorAndSendData();
   
   // 檢查指紋
   int fingerprintID = getFingerprintID();
@@ -68,20 +67,6 @@ void line_setup() {
   LINE.notify("Line Notify Link Confirm.");
 }
 
-// 檢查紅外線感測器並發送資料
-void checkIRSensorAndSendData() {
-  int L = digitalRead(irSensorPin);
-  sensors.requestTemperatures();
-  float tempC = sensors.getTempCByIndex(0);
-
-  if (L == 0) {
-    LINE.notify("Obstacle detected");
-    LINE.notify("Temperature: " + String(tempC) + " °C");
-  } else {
-    LINE.notify("=== All clear");
-    LINE.notify("Temperature: " + String(tempC) + " °C");
-  }
-}
 
 // 指紋傳感器初始化
 void fingerprint_setup() {

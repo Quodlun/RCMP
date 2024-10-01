@@ -12,8 +12,8 @@
 #define LINE_TOKEN "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz"
 
 // WiFi Credentials
-const char* ssid     = "君要臣死，臣";
-const char* password = "fAcebOok";
+const char* ssid     = "When Can My Internet Get Better";
+const char* password = "O00O00O0";
 
 // LCD Setup (I2C Address is typically 0x27 or 0x3F)
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // LCD I2C 地址 0x27，顯示為 16x2 字符
@@ -131,6 +131,7 @@ int getFingerprintID() {
     return finger.fingerID;
   } else {
     Serial.println("未找到匹配的指紋");
+    LINE.notify("警告!有未知人士正在使用點名器");
     return -1;
   }
 }

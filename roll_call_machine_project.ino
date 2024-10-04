@@ -37,37 +37,64 @@ void setup ()
   lineSetup ();
   lcdSetup ();
   timeSetup ();
+  fingerprintSetup();
 }
 
 void loop ()
-{  
-  //IR讀取數值變數
-  int L = digitalRead ( irSensorPin );
+{
+  // 檢查指紋
+  int fingerprintID = getFingerprintID();
 
-  //偵測到物件
-  if ( L == 0 )
+  if ( fingerprintID >= 0 )
   {
-    //溫度感測器數值請求
-    sensors.requestTemperatures ();
+    Serial.print ( "識別到指紋，ID: " );
+    Serial.println ( fingerprintID );
+    LINE.notify ( "Fingerprint ID: " + String ( fingerprintID ) );
 
-    //溫度讀取數值輸出
-    LINE.notify ( "Obstacle detected" );
-    LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
-    lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
+    lcd.setCursor ( 0, 0 );  // 設定光標在第一行
+    lcd.print ( "Fingerprint found" );
+    lcd.setCursor ( 0, 1 );  // 設定光標在第二行顯示ID
+    lcd.print ( "ID: " + String ( fingerprintID ) );
 
-    //NTP輸出
-    delay ( 500 );
-    localTime ();
-    lcdTimePrint ();
-    LINE.notify ( timeResult );
+    delay ( 3000 );
+    lcd.clear ();
+
+    //IR讀取數值變數
+    int L = digitalRead ( irSensorPin );
+
+    //偵測到物件
+    if ( L == 0 )
+    {
+      //溫度感測器數值請求
+      sensors.requestTemperatures ();
+
+      //溫度讀取數值輸出
+      LINE.notify ( "Obstacle detected" );
+      LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
+      lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
+
+      //NTP輸出
+      delay ( 500 );
+      localTime ();
+      lcdTimePrint ();
+      LINE.notify ( timeResult );
+    }
+  
+    else
+    {
+    //無偵測數值輸出
+      LINE.notify ( "=== All clear" );
+      lcdUndetectedPrint ();
+    }
   }
   
   else
   {
-    //無偵測數值輸出
-    LINE.notify ( "=== All clear" );
-    lcdUndetectedPrint ();
+    lcd.setCursor(0, 0);
+    lcd.print("No Match Found");
   }
+
+  
 
   delay ( 1000 );
 }
@@ -102,10 +129,37 @@ void lcdSetup ()
   lcd.clear ();
 }
 
-//NTP 設定
+//NTP設定
 void timeSetup ()
 {
   configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
+}
+
+//指紋模組設定
+void fingerprintSetup ()
+{
+  mySerial.begin ( 57600, SERIAL_8N1, 16, 17 ); // 初始化指紋傳感器
+  finger.begin ( 57600 );
+  delay ( 5 );
+
+  if ( finger.verifyPassword () )
+  {
+    Serial.println ( "找到指紋傳感器！" );
+    lcd.setCursor ( 0, 1 );
+    lcd.print ( "Fingerprint OK" );
+  }
+  
+  else
+  {
+    Serial.println ( "未找到指紋傳感器 :(" );
+    lcd.setCursor ( 0, 1 );
+    lcd.print ( "No Fingerprint" );
+
+    while ( 1 )
+    {
+      delay ( 1 ); // 無限等待，因為未找到傳感器
+    }
+  }
 }
 
 //LCD 輸出(偵測到物件:是)
@@ -150,104 +204,46 @@ void lcdTimePrint ()
   lcd.setCursor ( 0, 1 );
 }
 
-======
-
-void setup() {
-  // Initialize Sensors
-  sensors.begin();
-  wifi_setup();
-  line_setup();
-  fingerprint_setup();  // 初始化指紋傳感器
-  
-  lcd.clear();
-  lcd.print("System Ready");
-}
-
-void loop() {
-  
-  // 檢查指紋
-  int fingerprintID = getFingerprintID();
-  lcd.clear();
-  if (fingerprintID >= 0) {
-    Serial.print("識別到指紋，ID: ");
-    Serial.println(fingerprintID);
-    LINE.notify("Fingerprint ID: " + String(fingerprintID));
-
-    lcd.setCursor(0, 0);  // 設定光標在第一行
-    lcd.print("Fingerprint found");
-    lcd.setCursor(0, 1);  // 設定光標在第二行顯示ID
-    lcd.print("ID: " + String(fingerprintID));
-  } else {
-    lcd.setCursor(0, 0);
-    lcd.print("No Match Found");
-  }
-
-  delay(1000); // 每秒檢查一次
-}
-
-// WiFi 設定
-void wifi_setup() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
-
-  Serial.println("\nConnected to WiFi");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-// Line Notify 設定
-void line_setup() {
-  LINE.setToken(LINE_TOKEN);
-  LINE.notify("Line Notify Link Confirm.");
-}
-
-// 指紋傳感器初始化
-void fingerprint_setup() {
-  mySerial.begin(57600, SERIAL_8N1, 16, 17); // 初始化指紋傳感器
-  finger.begin(57600);
-  delay(5);
-
-  if (finger.verifyPassword()) {
-    Serial.println("找到指紋傳感器！");
-    lcd.setCursor(0, 1);
-    lcd.print("Fingerprint OK");
-  } else {
-    Serial.println("未找到指紋傳感器 :(");
-    lcd.setCursor(0, 1);
-    lcd.print("No Fingerprint");
-    while (1) delay(1); // 無限等待，因為未找到傳感器
-  }
-}
-
 // 檢查是否有檢測到指紋
-int getFingerprintID() {
-  uint8_t p = finger.getImage();
+int getFingerprintID ()
+{
+  uint8_t p = finger.getImage ();
   
   // 檢查是否檢測到手指
-  if (p == FINGERPRINT_NOFINGER) {
-    Serial.println("未檢測到手指");
+  if ( p == FINGERPRINT_NOFINGER )
+  {
+    Serial.println ( "未檢測到手指" );
     return -1;
-  } else if (p == FINGERPRINT_OK) {
-    Serial.println("指紋檢測成功");
-  } else {
-    Serial.println("指紋檢測失敗");
+  }
+  
+  else if ( p == FINGERPRINT_OK )
+  {
+    Serial.println ( "指紋檢測成功" );
+  }
+  
+  else
+  {
+    Serial.println ( "指紋檢測失敗" );
+
     return -1;
   }
 
   // 搜尋指紋匹配
-  p = finger.fingerSearch();
-  if (p == FINGERPRINT_OK) {
-    Serial.print("找到匹配的指紋，ID #"); 
-    Serial.println(finger.fingerID);
+  p = finger.fingerSearch ();
+
+  if ( p == FINGERPRINT_OK )
+  {
+    Serial.print ( "找到匹配的指紋，ID #" ); 
+    Serial.println ( finger.fingerID );
+
     return finger.fingerID;
-  } else {
-    Serial.println("未找到匹配的指紋");
-    LINE.notify("警告!有未知人士正在使用點名器");
+  }
+
+  else
+  {
+    Serial.println ( "未找到匹配的指紋" );
+    LINE.notify ( "警告!有未知人士正在使用點名器" );
+
     return -1;
   }
 }

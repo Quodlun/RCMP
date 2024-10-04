@@ -1,15 +1,16 @@
 #ifndef EXTERN_VARIABLE_H
 #define EXTERN_VARIABLE_H
 
-extern const int*  irSensorPin 16
-extern const int*  tempSensorPin 4
+// 宣告變數，去掉不必要的指標符號，並在 .h 文件中不初始化
+extern const int irSensorPin;
+extern const int tempSensorPin;
 
-extern const char* LINE_TOKEN = "Y3nL5gLv1Q7UiDshiv2rPZAXc4jbouEqzt04HmilnZo";
-extern const char* ssid = "FuNet-UAP";
-extern const char* password = "25785657";
+extern const char* LINE_TOKEN;
+extern const char* ssid;
+extern const char* password;
 
-extern const char* ntpServer = "time.google.com";
-extern const long* gmtOffset_sec = 28800;
-extern const int*  daylightOffset_sec = 0;
+extern const char* ntpServer;
+extern const long gmtOffset_sec;
+extern const int daylightOffset_sec;
 
 #endif

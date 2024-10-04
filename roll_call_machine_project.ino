@@ -9,6 +9,17 @@
 #include <Adafruit_Fingerprint.h>
 #include "extern_variable.h"
 
+// 在 .cpp 文件或主程式中進行初始化
+const int irSensorPin = 16;
+const int tempSensorPin = 4;
+
+const char* LINE_TOKEN = "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz";
+const char* ssid = "When Can My Internet Get Better";
+const char* password = "O00O00O0";
+
+const char* ntpServer = "time.google.com";
+const long gmtOffset_sec = 28800;  // GMT+8 的偏移量，秒數
+const int daylightOffset_sec = 0;  // 沒有日光節約時間
 //溫度setup
 OneWire oneWire ( tempSensorPin );
 DallasTemperature sensors ( &oneWire );

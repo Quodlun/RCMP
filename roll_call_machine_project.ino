@@ -1,6 +1,6 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <TridentTD_LineNotify.h>
+#include <TridentTD_LineNotify.h>  //IMPORTANT!!!: Please Use v3.0.5, it can NOT success the verify while using v3.0.6.
 #include <OneWire.h> 
 #include <DallasTemperature.h>
 #include <Wire.h>
@@ -9,6 +9,7 @@
 #include <Adafruit_Fingerprint.h>
 #include "extern_variable.h"
 
+/*  DEBUG CODE
 // 在 .cpp 文件或主程式中進行初始化
 const int irSensorPin = 16;
 const int tempSensorPin = 4;
@@ -20,6 +21,8 @@ const char* password = "O00O00O0";
 const char* ntpServer = "time.google.com";
 const long gmtOffset_sec = 28800;  // GMT+8 的偏移量，秒數
 const int daylightOffset_sec = 0;  // 沒有日光節約時間
+*/
+
 //溫度setup
 OneWire oneWire ( tempSensorPin );
 DallasTemperature sensors ( &oneWire );

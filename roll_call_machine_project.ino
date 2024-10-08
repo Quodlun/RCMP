@@ -52,6 +52,7 @@ void setup ()
   lcdSetup ();
   timeSetup ();
   fingerprintSetup();
+  bumperSetup ();
 }
 
 void loop ()
@@ -92,6 +93,8 @@ void loop ()
       localTime ();
       lcdTimePrint ();
       LINE.notify ( timeResult );
+
+      bumperWork ();
     }
   
     else
@@ -174,6 +177,13 @@ void fingerprintSetup ()
       delay ( 1 ); // 無限等待，因為未找到傳感器
     }
   }
+}
+
+//抽水馬達設定
+void bumperSetup ()
+{
+  pinMode ( bumperPin, OUTPUT );
+  digitalWrite ( bumperPin, LOW );
 }
 
 //LCD 輸出(偵測到物件:是)
@@ -260,4 +270,12 @@ int getFingerprintID ()
 
     return -1;
   }
+}
+
+//抽水馬達運作
+void bumperWork ()
+{
+  digitalWrite ( bumperPin, HIGH );
+  delay ( bumperDelay );
+  digitalWrite ( bumperPin, LOW );
 }

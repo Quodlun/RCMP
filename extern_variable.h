@@ -1,7 +1,16 @@
 #ifndef EXTERN_VARIABLE_H
 #define EXTERN_VARIABLE_H
 
-// 宣告變數，去掉不必要的指標符號，並在 .h 文件中不初始化
+/*
+    Bumper:
+        5V Power    *1
+        3.3V Power  *1
+        GND         *2
+        Output Pin  *1    13
+*/
+extern const int bumperPin = 13;
+extern const int bumperDelay = 500;
+
 extern const int irSensorPin = 16;
 extern const int tempSensorPin = 4;
 

@@ -34,6 +34,14 @@ Adafruit_Fingerprint finger ( &mySerial );
 //共用變數
 char timeResult [ 20 ];
 
+struct Student {
+    String name;
+    String className;
+    int seatNumber;
+};
+
+Student students[128];
+
 void setup ()
 {
   //距離setup
@@ -49,65 +57,63 @@ void setup ()
   lcdSetup ();
   timeSetup ();
   fingerprintSetup();
+  // 初始化學生資料
+  students[1] = {"李佳諺", "綜二愛", 12}; // ID: 1
+  
 }
 
-void loop ()
-{
-  // 檢查指紋
-  int fingerprintID = getFingerprintID();
+void loop() {
+    // 檢查指紋
+    int fingerprintID = getFingerprintID();
 
-  if ( fingerprintID >= 0 )
-  {
-    Serial.print ( "識別到指紋，ID: " );
-    Serial.println ( fingerprintID );
-    LINE.notify ( "Fingerprint ID: " + String ( fingerprintID ) );
+    if (fingerprintID >= 0) {
+        Serial.print("識別到指紋，ID: ");
+        Serial.println(fingerprintID);
 
-    lcd.setCursor ( 0, 0 );  // 設定光標在第一行
-    lcd.print ( "Fingerprint found" );
-    lcd.setCursor ( 0, 1 );  // 設定光標在第二行顯示ID
-    lcd.print ( "ID: " + String ( fingerprintID ) );
+        // 根據 ID 獲取學生資料
+        if (fingerprintID < 128) { // 確保 ID 在範圍內
+            String studentInfo = "班級: " + students[fingerprintID].className +
+                                  ", 姓名: " + students[fingerprintID].name +
+                                  ", 座號: " + String(students[fingerprintID].seatNumber);
+            LINE.notify(studentInfo);
+            lcd.setCursor(0, 0);  // 設定光標在第一行
+            lcd.print("Fingerprint found");
+            lcd.setCursor(0, 1);  // 設定光標在第二行顯示ID
+            lcd.print(studentInfo); // 輸出學生資訊
+        }
 
-    delay ( 3000 );
-    lcd.clear ();
+        delay(3000);
+        lcd.clear();
 
-    //IR讀取數值變數
-    int L = digitalRead ( irSensorPin );
+        // IR 讀取數值變數
+        int L = digitalRead(irSensorPin);
 
-    //偵測到物件
-    if ( L == 0 )
-    {
-      //溫度感測器數值請求
-      sensors.requestTemperatures ();
+        // 偵測到物件
+        if (L == 0) {
+            // 溫度感測器數值請求
+            sensors.requestTemperatures();
 
-      //溫度讀取數值輸出
-      LINE.notify ( "Obstacle detected" );
-      LINE.notify ( sensors.getTempCByIndex ( 0 ) ); //轉換攝氏度並輸出
-      lcdDetectedPrint ( sensors.getTempCByIndex ( 0 ) );
+            // 溫度讀取數值輸出
+            LINE.notify("Obstacle detected");
+            LINE.notify(sensors.getTempCByIndex(0)); // 轉換攝氏度並輸出
+            lcdDetectedPrint(sensors.getTempCByIndex(0));
 
-      //NTP輸出
-      delay ( 500 );
-      localTime ();
-      lcdTimePrint ();
-      LINE.notify ( timeResult );
+            // NTP 輸出
+            delay(500);
+            localTime();
+            lcdTimePrint();
+            LINE.notify(timeResult);
+        } else {
+            // 無偵測數值輸出
+            LINE.notify("=== All clear");
+            lcdUndetectedPrint();
+        }
+    } else {
+        lcd.setCursor(0, 0);
+        lcd.print("No Match Found");
     }
-  
-    else
-    {
-    //無偵測數值輸出
-      LINE.notify ( "=== All clear" );
-      lcdUndetectedPrint ();
-    }
-  }
-  
-  else
-  {
-    lcd.setCursor(0, 0);
-    lcd.print("No Match Found");
-  }
 
-  
-
-  delay ( 1000 );
+    delay(1000);
 }
 
 //網路設定

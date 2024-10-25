@@ -1,6 +1,6 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <TridentTD_LineNotify.h>
+#include <TridentTD_LineNotify.h>  //IMPORTANT!!!: Please Use v3.0.5, it can NOT success the verify while using v3.0.6.
 #include <OneWire.h> 
 #include <DallasTemperature.h>
 #include <Wire.h>
@@ -9,6 +9,7 @@
 #include <Adafruit_Fingerprint.h>
 #include "extern_variable.h"
 
+/*  DEBUG CODE
 // 在 .cpp 文件或主程式中進行初始化
 const int irSensorPin = 16;
 const int tempSensorPin = 4;
@@ -20,6 +21,8 @@ const char* password = "O00O00O0";
 const char* ntpServer = "time.google.com";
 const long gmtOffset_sec = 28800;  // GMT+8 的偏移量，秒數
 const int daylightOffset_sec = 0;  // 沒有日光節約時間
+*/
+
 //溫度setup
 OneWire oneWire ( tempSensorPin );
 DallasTemperature sensors ( &oneWire );
@@ -57,9 +60,13 @@ void setup ()
   lcdSetup ();
   timeSetup ();
   fingerprintSetup();
+<<<<<<< HEAD
   // 初始化學生資料
   students[1] = {"李佳諺", "綜二愛", 12}; // ID: 1
   
+=======
+  bumperSetup ();
+>>>>>>> 0bebb03061f6d9278837993a13a71959a931dc99
 }
 
 void loop() {
@@ -98,6 +105,7 @@ void loop() {
             LINE.notify(sensors.getTempCByIndex(0)); // 轉換攝氏度並輸出
             lcdDetectedPrint(sensors.getTempCByIndex(0));
 
+<<<<<<< HEAD
             // NTP 輸出
             delay(500);
             localTime();
@@ -111,6 +119,15 @@ void loop() {
     } else {
         lcd.setCursor(0, 0);
         lcd.print("No Match Found");
+=======
+      //NTP輸出
+      delay ( 500 );
+      localTime ();
+      lcdTimePrint ();
+      LINE.notify ( timeResult );
+
+      bumperWork ();
+>>>>>>> 0bebb03061f6d9278837993a13a71959a931dc99
     }
 
     delay(1000);
@@ -177,6 +194,13 @@ void fingerprintSetup ()
       delay ( 1 ); // 無限等待，因為未找到傳感器
     }
   }
+}
+
+//抽水馬達設定
+void bumperSetup ()
+{
+  pinMode ( bumperPin, OUTPUT );
+  digitalWrite ( bumperPin, LOW );
 }
 
 //LCD 輸出(偵測到物件:是)
@@ -263,4 +287,12 @@ int getFingerprintID ()
 
     return -1;
   }
+}
+
+//抽水馬達運作
+void bumperWork ()
+{
+  digitalWrite ( bumperPin, HIGH );
+  delay ( bumperDelay );
+  digitalWrite ( bumperPin, LOW );
 }

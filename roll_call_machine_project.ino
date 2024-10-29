@@ -53,20 +53,17 @@ void setup ()
   //接角及感測器設定
   pinMode ( irSensorPin, INPUT_PULLUP );
   sensors.begin ();
-
+  Wire.begin(SDA_PIN, SCL_PIN);
   //呼叫設定副程式
   wifiSetup ();
   lineSetup ();
   lcdSetup ();
   timeSetup ();
   fingerprintSetup();
-<<<<<<< HEAD
   // 初始化學生資料
   students[1] = {"李佳諺", "綜二愛", 12}; // ID: 1
   
-=======
   bumperSetup ();
->>>>>>> 0bebb03061f6d9278837993a13a71959a931dc99
 }
 
 void loop() {
@@ -105,7 +102,6 @@ void loop() {
             LINE.notify(sensors.getTempCByIndex(0)); // 轉換攝氏度並輸出
             lcdDetectedPrint(sensors.getTempCByIndex(0));
 
-<<<<<<< HEAD
             // NTP 輸出
             delay(500);
             localTime();
@@ -119,7 +115,6 @@ void loop() {
     } else {
         lcd.setCursor(0, 0);
         lcd.print("No Match Found");
-=======
       //NTP輸出
       delay ( 500 );
       localTime ();
@@ -127,7 +122,7 @@ void loop() {
       LINE.notify ( timeResult );
 
       bumperWork ();
->>>>>>> 0bebb03061f6d9278837993a13a71959a931dc99
+
     }
 
     delay(1000);

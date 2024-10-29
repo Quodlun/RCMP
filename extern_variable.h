@@ -11,8 +11,12 @@
 extern const int bumperPin = 13;
 extern const int bumperDelay = 500;
 
-extern const int irSensorPin = 16;
+extern const int irSensorPin = 18;
 extern const int tempSensorPin = 4;
+
+extern const int SDA_PIN = 21;
+extern const int SCL_PIN = 22;
+
 
 extern const char* LINE_TOKEN = "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz";
 extern const char* ssid = "When Can My Internet Get Better";

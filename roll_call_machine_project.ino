@@ -107,6 +107,10 @@ void loop() {
             localTime();
             lcdTimePrint();
             LINE.notify(timeResult);
+
+            // 延遲 3 秒再啟動馬達
+            delay(3000);
+            bumperWork(); // 啟動馬達
         } else {
             // 無偵測數值輸出
             LINE.notify("=== All clear");
@@ -121,7 +125,7 @@ void loop() {
       lcdTimePrint ();
       LINE.notify ( timeResult );
 
-      bumperWork ();
+
 
     }
 

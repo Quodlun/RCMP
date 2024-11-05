@@ -24,8 +24,7 @@ const int daylightOffset_sec = 0;  // 沒有日光節約時間
 */
 
 // 溫度setup
-OneWire oneWire ( tempSensorPin );
-DFRobot_MLX90614_IIC sensor;
+DFRobot_MLX90614_I2C sensor(0x5A, &Wire1);
 
 // LCD Setup
 LiquidCrystal_I2C lcd ( 0x27, 16, 2 );
@@ -55,8 +54,9 @@ void setup ()
 
   // 接角及感測器設定
   pinMode ( irSensorPin, INPUT_PULLUP );
-  sensors.begin ();
-  Wire.begin ( SDA_PIN, SCL_PIN );
+  sensor.begin ();
+  Wire.begin(LCD_SDA_PIN, LCD_SCL_PIN);
+  Wire1.begin(TEMP_SDA_PIN, TEMP_SCL_PIN);
   // 呼叫設定副程式
   tempSensorSetup ();
   wifiSetup ();
@@ -99,18 +99,22 @@ void loop () {
         // 偵測到物件
         if (L == 0) {
             // 溫度感測器數值請求
-            tempSensorGet ()
+            tempSensorGet();
 
             // 溫度讀取數值輸出
-            LINE.notify ( "Obstacle detected" );
-            LINE.notify( objectTemp ); // 轉換攝氏度並輸出
-            lcdDetectedPrint( objectTemp );
+            LINE.notify("Obstacle detected");
+            LINE.notify(objectTemp); // 轉換攝氏度並輸出
+            lcdDetectedPrint(objectTemp);
 
             // NTP 輸出
             delay(500);
             localTime();
             lcdTimePrint();
             LINE.notify(timeResult);
+
+            // 啟動BUMP工作2秒
+            bumperWork();
+            delay(2000);  // BUMP工作2秒
         } else {
             // 無偵測數值輸出
             LINE.notify("=== All clear");
@@ -119,17 +123,13 @@ void loop () {
     } else {
         lcd.setCursor(0, 0);
         lcd.print("No Match Found");
-      // NTP輸出
-      delay ( 500 );
-      localTime ();
-      lcdTimePrint ();
-      LINE.notify ( timeResult );
-
-      bumperWork ();
-
+        
+        // NTP輸出
+        delay(500);
+        localTime(); 
+        lcdTimePrint();
+        LINE.notify(timeResult);
     }
-
-    delay(1000);
 }
 
 // 網路設定

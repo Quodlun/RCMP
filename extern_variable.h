@@ -3,22 +3,26 @@
 
 /*
     Bumper:
-        5V Power    *1
         3.3V Power  *1
-        GND         *2
-        Output Pin  *1    13
+        GND         *1
+        Output Pin  *1
 */
 extern const int bumperPin = 13;
 extern const int bumperDelay = 500;
 
+/*
+    IR Sensor
+        3.3V VCC    *1    Brown
+        GND         *1    Blue
+        Data        *1    Black
+*/
 extern const int irSensorPin = 18;
 
-extern const int LCD_SDA_PIN= 21;
-extern const int LCD_SCL_PIN= 22;
+// Old temperature sensor setting, use as spare sensor.
+extern const int tempSensorPin = 4;
 
-extern const int TEMP_SDA_PIN= 26;
-extern const int TEMP_SCL_PIN= 27;
-
+extern const int SDA_PIN = 21;
+extern const int SCL_PIN = 22;
 
 extern const char* LINE_TOKEN = "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz";
 extern const char* ssid = "When Can My Internet Get Better";

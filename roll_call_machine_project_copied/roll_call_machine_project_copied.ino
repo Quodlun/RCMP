@@ -36,21 +36,17 @@ void setup()
 
 void loop()
 {
-  lcd.clear();
-
   int L = digitalRead(irSensorPin);
 
-  if (L == 0)
+  if (digitalRead(irSensorPin) == LOW)
   {
     tempSensorGet();
 
     LINE.notify("Obstacle detected");
     LINE.notify(objectTemp);
-    lcdDetectedPrint(objectTemp);
-
-    delay(500);
     localTime();
     lcdTimePrint();
+    lcdDetectedPrint(objectTemp);
     LINE.notify(timeResult);
 
     bumperWork();
@@ -118,10 +114,7 @@ void bumperSetup()
 
 void lcdDetectedPrint(float temp)
 {
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Detected");
-
+  lcd.clear ();
   lcd.setCursor(0, 1);
   lcd.print(temp);
 }
@@ -147,52 +140,8 @@ void localTime()
 
 void lcdTimePrint()
 {
-  lcd.clear();
   lcd.setCursor(0, 0);
-
   lcd.print(timeResult);
-  lcd.setCursor(0, 1);
-}
-
-int getFingerprintID()
-{
-  uint8_t p = finger.getImage();
-
-  if (p == FINGERPRINT_NOFINGER)
-  {
-    Serial.println("未檢測到手指");
-    return -1;
-  }
-
-  else if (p == FINGERPRINT_OK)
-  {
-    Serial.println("指紋檢測成功");
-  }
-
-  else
-  {
-    Serial.println("指紋檢測失敗");
-
-    return -1;
-  }
-
-  p = finger.fingerSearch();
-
-  if (p == FINGERPRINT_OK)
-  {
-    Serial.print("找到匹配的指紋，ID #");
-    Serial.println(finger.fingerID);
-
-    return finger.fingerID;
-  }
-
-  else
-  {
-    Serial.println("未找到匹配的指紋");
-    LINE.notify("警告!有未知人士正在使用點名器");
-
-    return -1;
-  }
 }
 
 void bumperWork()

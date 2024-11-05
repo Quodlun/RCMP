@@ -14,8 +14,8 @@ extern const int bumperDelay = 500;
 extern const int irSensorPin = 18;
 extern const int tempSensorPin = 4;
 
-extern const int SDA_PIN = 21;
-extern const int SCL_PIN = 22;
+extern const int SDA_PIN = 26;
+extern const int SCL_PIN = 27;
 
 
 extern const char* LINE_TOKEN = "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz";

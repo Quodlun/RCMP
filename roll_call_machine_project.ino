@@ -1,12 +1,12 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <TridentTD_LineNotify.h>  //IMPORTANT!!!: Please Use v3.0.5, it can NOT success the verify while using v3.0.6.
-#include <OneWire.h> 
-#include <DallasTemperature.h>
+#include <TridentTD_LineNotify.h>  // IMPORTANT!!!: Please Use v3.0.5, it can NOT success the verify while using v3.0.6.
+#include <OneWire.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <time.h>
 #include <Adafruit_Fingerprint.h>
+#include <DFRobot_MLX90614.h>
 #include "extern_variable.h"
 
 /*  DEBUG CODE
@@ -23,45 +23,49 @@ const long gmtOffset_sec = 28800;  // GMT+8 的偏移量，秒數
 const int daylightOffset_sec = 0;  // 沒有日光節約時間
 */
 
-//溫度setup
+// 溫度setup
 OneWire oneWire ( tempSensorPin );
-DallasTemperature sensors ( &oneWire );
+DFRobot_MLX90614_IIC sensor;
 
-//LCD Setup
+// LCD Setup
 LiquidCrystal_I2C lcd ( 0x27, 16, 2 );
 
 // 指紋模組 Setup
 HardwareSerial mySerial ( 2 ); 
 Adafruit_Fingerprint finger ( &mySerial );
 
-//共用變數
+// 共用變數
 char timeResult [ 20 ];
+float objectTemp;
 
-struct Student {
-    String name;
-    String className;
-    int seatNumber;
+
+struct Student
+{
+  String name;
+  String className;
+  int seatNumber;
 };
 
-Student students[128];
+Student students [ 128 ];
 
 void setup ()
 {
-  //距離setup
+  // 距離setup
   Serial.begin ( 115200 );
 
-  //接角及感測器設定
+  // 接角及感測器設定
   pinMode ( irSensorPin, INPUT_PULLUP );
   sensors.begin ();
-  Wire.begin(SDA_PIN, SCL_PIN);
-  //呼叫設定副程式
+  Wire.begin ( SDA_PIN, SCL_PIN );
+  // 呼叫設定副程式
+  tempSensorSetup ();
   wifiSetup ();
   lineSetup ();
   lcdSetup ();
   timeSetup ();
-  fingerprintSetup();
+  fingerprintSetup ();
   // 初始化學生資料
-  students[1] = {"李佳諺", "綜二愛", 12}; // ID: 1
+  students [ 1 ] = { "李佳諺", "綜三愛", 12 }; // ID: 1
   
   bumperSetup ();
 }
@@ -95,12 +99,12 @@ void loop() {
         // 偵測到物件
         if (L == 0) {
             // 溫度感測器數值請求
-            sensors.requestTemperatures();
+            tempSensorGet();
 
             // 溫度讀取數值輸出
             LINE.notify("Obstacle detected");
-            LINE.notify(sensors.getTempCByIndex(0)); // 轉換攝氏度並輸出
-            lcdDetectedPrint(sensors.getTempCByIndex(0));
+            LINE.notify(objectTemp); // 轉換攝氏度並輸出
+            lcdDetectedPrint(objectTemp);
 
             // NTP 輸出
             delay(500);
@@ -108,9 +112,9 @@ void loop() {
             lcdTimePrint();
             LINE.notify(timeResult);
 
-            // 延遲 3 秒再啟動馬達
-            delay(3000);
-            bumperWork(); // 啟動馬達
+            // 啟動BUMP工作2秒
+            bumperWork();
+            delay(2000);  // BUMP工作2秒
         } else {
             // 無偵測數值輸出
             LINE.notify("=== All clear");
@@ -119,20 +123,16 @@ void loop() {
     } else {
         lcd.setCursor(0, 0);
         lcd.print("No Match Found");
-      //NTP輸出
-      delay ( 500 );
-      localTime ();
-      lcdTimePrint ();
-      LINE.notify ( timeResult );
-
-
-
+        
+        // NTP輸出
+        delay(500);
+        localTime(); 
+        lcdTimePrint();
+        LINE.notify(timeResult);
     }
-
-    delay(1000);
 }
 
-//網路設定
+// 網路設定
 void wifiSetup ()
 {
   WiFi.mode ( WIFI_STA );
@@ -144,14 +144,14 @@ void wifiSetup ()
   }
 }
 
-//Line Notify設定 
+// Line Notify設定 
 void lineSetup ()
 {
   LINE.setToken ( LINE_TOKEN );
   LINE.notify ( "Line Notify Link Confirm." );
 }
 
-//LCD I2C設定
+// LCD I2C設定
 void lcdSetup ()
 {
   lcd.init ();
@@ -162,13 +162,28 @@ void lcdSetup ()
   lcd.clear ();
 }
 
-//NTP設定
+// NTP設定
 void timeSetup ()
 {
   configTime ( gmtOffset_sec, daylightOffset_sec, ntpServer );
 }
 
-//指紋模組設定
+// 溫度感測器設定
+void tempSensorSetup ()
+{
+  while ( NO_ERR != sensor.begin () )
+  {
+    Serial.println ( "Temp sensor connect failed." );
+    delay ( 3000 );
+  }
+
+  sensor.enterSleepMode();
+  delay(50);
+  sensor.enterSleepMode(false);
+  delay(200);
+}
+
+// 指紋模組設定
 void fingerprintSetup ()
 {
   mySerial.begin ( 57600, SERIAL_8N1, 16, 17 ); // 初始化指紋傳感器
@@ -195,14 +210,14 @@ void fingerprintSetup ()
   }
 }
 
-//抽水馬達設定
+// 抽水馬達設定
 void bumperSetup ()
 {
   pinMode ( bumperPin, OUTPUT );
   digitalWrite ( bumperPin, LOW );
 }
 
-//LCD 輸出(偵測到物件:是)
+// LCD 輸出(偵測到物件:是)
 void lcdDetectedPrint ( float temp )
 {
   lcd.clear ();
@@ -213,7 +228,7 @@ void lcdDetectedPrint ( float temp )
   lcd.print ( temp );
 }
 
-//LCD 輸出(偵測到物件:否)
+// LCD 輸出(偵測到物件:否)
 void lcdUndetectedPrint ()
 {
     lcd.clear ();
@@ -221,7 +236,7 @@ void lcdUndetectedPrint ()
     lcd.print ( "=== All clear" );
 }
 
-//讀取及時時間
+// 讀取及時時間
 void localTime ()
 {
   time_t rawTime;
@@ -234,7 +249,7 @@ void localTime ()
   strftime ( timeResult, sizeof ( timeResult ), "%Y-%m-%d %H:%M", info );
 }
 
-//LCD NTP 輸出
+// LCD NTP 輸出
 void lcdTimePrint ()
 {
   lcd.clear ();
@@ -288,10 +303,16 @@ int getFingerprintID ()
   }
 }
 
-//抽水馬達運作
+// 抽水馬達運作
 void bumperWork ()
 {
   digitalWrite ( bumperPin, HIGH );
   delay ( bumperDelay );
   digitalWrite ( bumperPin, LOW );
+}
+
+// 溫度感測器讀取溫度
+void tempSensorGet ()
+{
+  objectTemp = sensor.getObjectTempCelsius ();
 }

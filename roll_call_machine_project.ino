@@ -23,7 +23,18 @@ const long gmtOffset_sec = 28800;  // GMT+8 的偏移量，秒數
 const int daylightOffset_sec = 0;  // 沒有日光節約時間
 */
 
+// I2C Setup
+Wire.begin(sda_pin, scl_pin);
 
+// 溫度 Setup
+DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
+
+// LCD Setup
+LiquidCrystal_I2C lcd(LCD_I2C_ADDR, 16, 2);
+
+// 指紋模組 Setup
+HardwareSerial mySerial(2);
+Adafruit_Fingerprint finger(&mySerial);
 
 // 共用變數
 char timeResult[20];
@@ -40,19 +51,6 @@ Student students[128];
 
 void setup()
 {
-  // I2C Setup
-  Wire.begin(sda_pin, scl_pin);
-
-  // 溫度 Setup
-  DFRobot_MLX90614_I2C sensor(0x5A, &Wire);
-
-  // LCD Setup
-  LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-  // 指紋模組 Setup
-  HardwareSerial mySerial(2);
-  Adafruit_Fingerprint finger(&mySerial);
-  
   // 距離setup
   Serial.begin(115200);
 

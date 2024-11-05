@@ -24,8 +24,7 @@ const int daylightOffset_sec = 0;  // 沒有日光節約時間
 */
 
 // 溫度setup
-OneWire oneWire ( tempSensorPin );
-DFRobot_MLX90614_IIC sensor;
+DFRobot_MLX90614_I2C sensor(0x5A, &Wire1);
 
 // LCD Setup
 LiquidCrystal_I2C lcd ( 0x27, 16, 2 );
@@ -55,8 +54,9 @@ void setup ()
 
   // 接角及感測器設定
   pinMode ( irSensorPin, INPUT_PULLUP );
-  sensors.begin ();
-  Wire.begin ( SDA_PIN, SCL_PIN );
+  sensor.begin ();
+  Wire.begin(LCD_SDA_PIN, LCD_SCL_PIN);
+  Wire1.begin(TEMP_SDA_PIN, TEMP_SCL_PIN);
   // 呼叫設定副程式
   tempSensorSetup ();
   wifiSetup ();

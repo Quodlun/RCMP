@@ -12,10 +12,12 @@ extern const int bumperPin = 13;
 extern const int bumperDelay = 500;
 
 extern const int irSensorPin = 18;
-extern const int tempSensorPin = 4;
 
-extern const int SDA_PIN = 26;
-extern const int SCL_PIN = 27;
+extern const int LCD_SDA_PIN= 21;
+extern const int LCD_SCL_PIN= 22;
+
+extern const int TEMP_SDA_PIN= 26;
+extern const int TEMP_SCL_PIN= 27;
 
 
 extern const char* LINE_TOKEN = "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz";

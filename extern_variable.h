@@ -21,8 +21,8 @@ extern const int irSensorPin = 18;
 // Old temperature sensor setting, use as spare sensor.
 extern const int tempSensorPin = 4;
 
-extern const int SDA_PIN = 21;
-extern const int SCL_PIN = 22;
+extern const int sda_pin = 21;
+extern const int scl_pin = 22;
 
 extern const char* LINE_TOKEN = "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz";
 extern const char* ssid = "When Can My Internet Get Better";

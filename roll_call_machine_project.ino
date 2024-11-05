@@ -22,10 +22,7 @@ const char* ntpServer = "time.google.com";
 const long gmtOffset_sec = 28800;  // GMT+8 的偏移量，秒數
 const int daylightOffset_sec = 0;  // 沒有日光節約時間
 */
-
-// I2C Setup
-Wire.begin(sda_pin, scl_pin);
-
+ 
 // 溫度 Setup
 DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 

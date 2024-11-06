@@ -43,6 +43,7 @@ void loop()
     3: Line Notify
     4: LCD
     5: Bumper
+    6: Temperature Sensor
   */
   debug ();
 
@@ -192,8 +193,13 @@ void debug ( debug_code );
     case 5:
       bumperDebug ();
       break;
+
+    case 6:
+      tempSensorDebug ();
+      break;
   
     default:
+      wifiDebug ();
       break;
   }
 }
@@ -269,4 +275,15 @@ void bumperDebug ();
 
   digitalWrite ( bumperPin, LOW );
   delay ( 5000 );
+}
+
+void tempSensorDebug ()
+{
+  float ambientTemp = sensor.getAmbientTempCelsius();
+  float objectTemp = sensor.getObjectTempCelsius();
+
+  Serial.print("Ambient celsius : "); Serial.print(ambientTemp); Serial.println(" °C");
+  Serial.print("Object celsius : ");  Serial.print(objectTemp);  Serial.println(" °C");
+
+  delay ( 1000 );
 }

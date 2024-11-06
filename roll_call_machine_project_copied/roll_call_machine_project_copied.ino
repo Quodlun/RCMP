@@ -23,7 +23,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  pinMode(irSensorPin, INPUT_PULLUP);
+  pinMode(irSensorPin, INPUT);
   sensor.begin();
 
   tempSensorSetup();
@@ -45,7 +45,7 @@ void loop()
     5: Bumper
     6: Temperature Sensor
   */
-  debug ();
+  debug ( 2 );
 
   if (digitalRead(irSensorPin) == LOW)
   {
@@ -79,9 +79,14 @@ void wifiSetup()
   while (WiFi.status() != WL_CONNECTED)
   {
     offline_count ++;
-    Serial.println ( f"Debug: WiFi Setup Failed (%d)", offline_count );
+    Serial.print ( "Debug: WiFi Setup Failed (" ); Serial.print ( offline_count ); Serial.println ( ")" );
     delay(500);
   }
+
+  Serial.print ( "Connected to " );
+  Serial.println ( ssid );
+  Serial.print ( "IP address: " );
+  Serial.println ( WiFi.localIP () );
 }
 
 void lineSetup()
@@ -170,7 +175,7 @@ void tempSensorGet()
 }
 
 // Debug Code
-void debug ( debug_code );
+void debug ( int debug_code )
 {
   switch ( debug_code )
   {
@@ -205,17 +210,21 @@ void debug ( debug_code );
 }
 void irSensorDebug ()
 {
-  if ( digitalRead ( irSensorPin ) == LOW )
+  while ( true )
   {
-    Serial.println ( "Object Detected." );
-  }
+    if ( digitalRead ( irSensorPin ) == LOW )
+    {
+      Serial.println ( "Object Detected." );
+    }
 
-  else
-  {
-    Serial.println ( "IR Sensor Clear" );
-  }
+    else
+    {
+      Serial.println ( "IR Sensor Clear" );
+    }
 
-  delay ( 1000 );
+    delay ( 500 );
+  }
+  
 }
 
 void lineNotifyDebug ()
@@ -227,25 +236,30 @@ void lineNotifyDebug ()
 
 void wifiDebug ()
 {
-  int offline_count = 0;
+  int dropped_count = 0;
 
   while (WiFi.status() != WL_CONNECTED)
   {
-    offline_count ++;
-    Serial.println ( f"Debug: WiFi Dropped (%d)"7, offline_count );
+    dropped_count ++;
+    Serial.print ( "Debug: WiFi Dropped (" ); Serial.print ( dropped_count ); Serial.println ( ")" );
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 
     delay(500);
   }
+
+  Serial.print ( "Connected to " );
+  Serial.println ( ssid );
+  Serial.print ( "IP address: " );
+  Serial.println ( WiFi.localIP () );
 }
 
 void lcdDebug ()
 {
   lcd.clear ();
 
-  for ( int i = 0; i < 3, i ++ )
+  for ( int i = 0; i < 3; i ++ );
   {
     lcd.setCursor ( 0, 0 );
     lcd.print ( "LCD Debug Mode" );
@@ -268,7 +282,7 @@ void lcdDebug ()
   }
 }
 
-void bumperDebug ();
+void bumperDebug ()
 {
   digitalWrite ( bumperPin, HIGH );
   delay ( 5000 );

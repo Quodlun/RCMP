@@ -12,11 +12,11 @@ extern const int bumperDelay = 500;
 
 /*
     IR Sensor
-        3.3V VCC    *1    Brown
+        5V VCC      *1    Brown
         GND         *1    Blue
         Data        *1    Black
 */
-extern const int irSensorPin = 18;
+#define irSensorPin 12
 
 // Old temperature sensor setting, use as spare sensor.
 extern const int tempSensorPin = 4;
@@ -28,8 +28,8 @@ extern const int tempSensorPin = 4;
 #define LCD_I2C_ADDR 0x27
 
 extern const char* LINE_TOKEN = "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz";
-extern const char* ssid = "When Can My Internet Get Better";
-extern const char* password = "O00O00O0";
+extern const char* ssid = "FuNet-UAP";
+extern const char* password = "25785657";
 
 extern const char* ntpServer = "time.google.com";
 extern const long gmtOffset_sec = 28800;

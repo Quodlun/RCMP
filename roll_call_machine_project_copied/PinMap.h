@@ -7,7 +7,7 @@
         GND         *1
         Output Pin  *1
 */
-#define bumperPin = 13;
+#define bumperPin 13
 
 /*
     IR Sensor
@@ -18,7 +18,7 @@
 #define irSensorPin 12
 
 // Old temperature sensor setting, use as spare sensor.
-#define tempSensorPin 4;
+#define tempSensorPin 4
 
 #define sda_pin 21
 #define scl_pin 22

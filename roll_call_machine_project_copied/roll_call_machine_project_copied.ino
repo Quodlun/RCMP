@@ -7,7 +7,8 @@
 #include <time.h>
 #include <Adafruit_Fingerprint.h>
 #include <DFRobot_MLX90614.h>
-#include "extern_variable.h"
+#include "ExternVariable.h"
+#include "PinMap.h"
 
 DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 
@@ -45,7 +46,7 @@ void loop()
     5: Bumper
     6: Temperature Sensor
   */
-  debug ( 2 );
+  debug ( 3 );
 
   if (digitalRead(irSensorPin) == LOW)
   {

@@ -14,9 +14,6 @@ DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 
 LiquidCrystal_I2C lcd(LCD_I2C_ADDR, 16, 2);
 
-HardwareSerial mySerial(2);
-Adafruit_Fingerprint finger(&mySerial);
-
 char timeResult[20];
 float objectTemp;
 
@@ -46,7 +43,7 @@ void loop()
     5: Bumper
     6: Temperature Sensor
   */
-  debug ( 3 );
+  debug ( 4 );
 
   if (digitalRead(irSensorPin) == LOW)
   {

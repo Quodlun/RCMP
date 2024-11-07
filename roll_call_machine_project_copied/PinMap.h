@@ -15,7 +15,7 @@
         GND         *1    Blue
         Data        *1    Black
 */
-#define irSensorPin 12
+#define irSensorPin 16
 
 // Old temperature sensor setting, use as spare sensor.
 #define tempSensorPin 4

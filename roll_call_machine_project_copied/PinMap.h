@@ -7,7 +7,7 @@
         GND         *1
         Output Pin  *1
 */
-#define bumperPin 13
+#define bumperPin 17
 
 /*
     IR Sensor

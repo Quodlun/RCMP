@@ -5,7 +5,6 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <time.h>
-#include <Adafruit_Fingerprint.h>
 #include <DFRobot_MLX90614.h>
 #include "ExternVariable.h"
 #include "PinMap.h"

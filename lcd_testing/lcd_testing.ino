@@ -1,11 +1,15 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <DFRobot_MLX90614.h> 
 
 LiquidCrystal_I2C lcd ( 0x27, 16, 2 );
+DFRobot_MLX90614_I2C sensor(0x5A, &Wire);
 
 void setup ()
 {
   Serial.begin ( 115200 );
+
+  sensor.begin();
 
   lcd.init ();
   lcd.backlight ();
@@ -19,12 +23,9 @@ void setup ()
 
 void loop ()
 {
-  lcd.setCursor ( 0, 0 );
-  lcd.print ( "0123456789ABCDEF");
-  lcd.setCursor ( 0, 1 );
-  lcd.print ( "0123456789ABCDEF");
-  delay ( 5000 );
+  int objectTemp = sensor.getObjectTempCelsius();
 
-  lcd.clear ();
+  lcd.setCursor ( 0, 0 );
+  lcd.print ( objectTemp );
   delay ( 1000 );
 }

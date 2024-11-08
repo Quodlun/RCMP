@@ -6,9 +6,9 @@
 #include "PinMap.h"
 
 LiquidCrystal_I2C lcd ( LCD_I2C_ADDR, 16, 2 );
-DFRobot_MLX90614_I2C sensor( MLX90614_I2C_ADDR , &Wire );
+DFRobot_MLX90614_I2C sensor ( MLX90614_I2C_ADDR , &Wire );
 
-int objectTemp = 0;
+float objectTemp = 0;
 bool bumperWorked = false;
 
 void setup ()
@@ -26,13 +26,16 @@ void setup ()
 
 void loop ()
 {
-  objectTemp = sensor.getObjectTempCelsius();
+  char tempResult [ 6 ];
+  sprintf ( tempResult, "%4.2f", sensor.getObjectTempCelsius () );
   lcd.clear ();
 
   if ( digitalRead ( irSensorPin ) == LOW )
   {
     lcd.setCursor ( 0, 0 );
-    lcd.print ( objectTemp );
+    lcd.print ( "Detected" );
+    lcd.setCursor ( 0, 1 );
+    lcd.print ( tempResult );
 
     if ( !bumperWorked )
     {

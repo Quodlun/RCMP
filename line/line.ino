@@ -1,26 +1,18 @@
-include <WiFi.h>
+#include <WiFi.h>
 #include <WiFiClient.h>
 #include <TridentTD_LineNotify.h>
 #include <OneWire.h> 
 #include <DallasTemperature.h> 
 #include <CapacitiveFingerprint.h>  // 假設電容式指紋傳感器庫
-#include <LiquidCrystal_I2C.h>
 
 // Pin Definitions
-#define irSensorPin 2
-#define tempSensorPin 4
 #define LINE_TOKEN "MbcvZH9nf1mvsSkXBzEpoQDQNOaNkWpHJ2nmoSBSBpz"
 
 // WiFi Credentials
-const char* ssid     = "君要臣死，臣";
-const char* password = "fAcebOok";
+const char* ssid     = "When Can My Internet Get Better";
+const char* password = "O00O00O0";
 
-// LCD Setup (I2C Address is typically 0x27 or 0x3F)
-LiquidCrystal_I2C lcd(0x27, 16, 2);  // LCD I2C 地址 0x27，顯示為 16x2 字符
 
-// Temperature Sensor Setup
-OneWire oneWire(tempSensorPin);
-DallasTemperature sensors(&oneWire);
 
 // 假設電容式指紋傳感器的設置
 HardwareSerial mySerial(2); 
@@ -28,43 +20,25 @@ CapacitiveFingerprint finger(&mySerial);  // 使用電容式指紋模組的庫
 
 void setup() {
   Serial.begin(115200);
-  
-  // Initialize I2C and LCD
-  Wire.begin(21, 22); // 使用 GPIO 21 (SDA) 和 GPIO 22 (SCL) 初始化 I2C
-  lcd.begin(16,2);    // 初始化 LCD 顯示
-  lcd.backlight();    // 開啟 LCD 背光
-  lcd.print("Initializing...");
-
-  pinMode(irSensorPin, INPUT_PULLUP);
 
   // Initialize Sensors
   sensors.begin();
   wifi_setup();
   line_setup();
   fingerprint_setup();  // 初始化指紋傳感器
-  
-  lcd.clear();
-  lcd.print("System Ready");
+
+  Serial.println("System Ready");
 }
 
 void loop() {
   // 檢查指紋
   int fingerprintID = getFingerprintID();
-  lcd.clear();
   if (fingerprintID >= 0) {
     Serial.print("識別到指紋，ID: ");
     Serial.println(fingerprintID);
     LINE.notify("Fingerprint ID: " + String(fingerprintID));
-
-    lcd.setCursor(0, 0);  // 設定光標在第一行
-    lcd.print("Fingerprint found");
-    lcd.setCursor(0, 1);  // 設定光標在第二行顯示ID
-    lcd.print("ID: " + String(fingerprintID));
   } else {
-    lcd.setCursor(0, 0);
-    lcd.print("No Match Found");
-
-    // 如果沒有匹配，發送警告
+    Serial.println("No Match Found");
     LINE.notify("警告!有未知人士正在使用點名器");
   }
 
@@ -100,12 +74,8 @@ void fingerprint_setup() {
 
   if (finger.verifyPassword()) {
     Serial.println("找到電容式指紋傳感器！");
-    lcd.setCursor(0, 1);
-    lcd.print("Fingerprint OK");
   } else {
     Serial.println("未找到指紋傳感器 :(");
-    lcd.setCursor(0, 1);
-    lcd.print("No Fingerprint");
     while (1) delay(1); // 無限等待，因為未找到傳感器
   }
 }
@@ -135,4 +105,6 @@ int getFingerprintID() {
     Serial.println("未找到匹配的指紋");
     return -1;
   }
+}
+
 }

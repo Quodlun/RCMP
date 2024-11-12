@@ -43,7 +43,7 @@ void loop ()
       lcd.print("Detected");
       lcd.setCursor(0, 1);
       lcd.print(tempResult);
-      
+      delay(2000); // 延遲2秒等待 bumper 偵測
       if (!bumperWorked) {
         bumperWork();
       }

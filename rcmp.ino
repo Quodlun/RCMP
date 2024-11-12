@@ -1,10 +1,14 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <DFRobot_MLX90614.h>
-
+#include <HardwareSerial.h>
+#include <Adafruit_Fingerprint.h>  
 #include "ExternVariable.h"
 #include "PinMap.h"
 
+// 指紋傳感器設置
+HardwareSerial mySerial(1); // 使用 ESP32 的第二個串口（UART1）
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 LiquidCrystal_I2C lcd ( LCD_I2C_ADDR, 16, 2 );
 DFRobot_MLX90614_I2C sensor ( MLX90614_I2C_ADDR , &Wire );
 
@@ -13,47 +17,51 @@ bool bumperWorked = false;
 
 void setup ()
 {
-  Serial.begin ( 115200 );
-
+  Serial.begin(115200);
+  fingerprint_setup();  // 初始化指紋傳感器
+  Serial.println("System Ready");
   sensor.begin();
   pinMode ( irSensorPin, INPUT );
-
   bumperSetup ();
   lcdSetup ();
-
   bumperWork ();
 }
 
 void loop ()
 {
-  char tempResult [ 6 ];
-  sprintf ( tempResult, "%4.2f", sensor.getObjectTempCelsius () );
-  lcd.clear ();
-
-  if ( digitalRead ( irSensorPin ) == LOW )
-  {
-    lcd.setCursor ( 0, 0 );
-    lcd.print ( "Detected" );
-    lcd.setCursor ( 0, 1 );
-    lcd.print ( tempResult );
-
-    if ( !bumperWorked )
-    {
-      bumperWork ();
-    }
-  }
-
-  else
-  {
+  char tempResult[6];
+  sprintf(tempResult, "%4.2f", sensor.getObjectTempCelsius());
+  lcd.clear();
+  
+  int fingerprintID = getFingerprintID();
+  if (fingerprintID >= 0) {
+    Serial.print("識別到指紋，ID: ");
+    Serial.println(fingerprintID);
     
-    lcd.setCursor ( 0, 0 );
-    lcd.print ( "Undetected" );
+    if (digitalRead(irSensorPin) == LOW) {
+      lcd.setCursor(0, 0);
+      lcd.print("Detected");
+      lcd.setCursor(0, 1);
+      lcd.print(tempResult);
+      
+      if (!bumperWorked) {
+        bumperWork();
+      }
+    } else {
+      lcd.setCursor(0, 0);
+      lcd.print("Undetected");
 
-    bumperWorked = false;
+      bumperWorked = false;
+    }
+
+    delay(1000); // 每秒檢查一次
+  } else {
+    Serial.println("No Match Found");
   }
   
-  delay ( 500 );
+  delay(500);
 }
+
 
 void lcdSetup ()
 {
@@ -81,4 +89,47 @@ void bumperWork ()
   digitalWrite ( bumperPin, HIGH );
 
   bumperWorked = true;
+}
+
+// 指紋傳感器初始化
+void fingerprint_setup() {
+  mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
+  
+  if (finger.verifyPassword()) {
+    Serial.println("指紋傳感器連接成功！");
+  } else {
+    Serial.println("無法找到指紋傳感器，請檢查接線和連接。");
+    while (1) { delay(1); }
+  }
+
+  finger.getTemplateCount(); // 讀取指紋模板數量
+  Serial.print("已存儲的指紋數量："); 
+  Serial.println(finger.templateCount);
+}
+
+// 獲取指紋 ID 的副程式，包含狀態檢查和匹配
+int getFingerprintID() {
+  uint8_t p = finger.getImage();
+
+  // 檢查是否檢測到手指
+  if (p == FINGERPRINT_NOFINGER) {  // 正確的指紋狀態常量
+    Serial.println("未檢測到手指");
+    return -1;
+  } else if (p == FINGERPRINT_OK) {  // 成功狀態
+    Serial.println("指紋檢測成功");
+  } else {
+    Serial.println("指紋檢測失敗");
+    return -1;
+  }
+
+  // 搜尋指紋匹配
+  p = finger.fingerFastSearch();  // 使用快速搜尋函數
+  if (p == FINGERPRINT_OK) {  // 匹配成功
+    Serial.print("找到匹配的指紋，ID #"); 
+    Serial.println(finger.fingerID);
+    return finger.fingerID;
+  } else {
+    Serial.println("未找到匹配的指紋");
+    return -1;
+  }
 }

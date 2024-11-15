@@ -20,7 +20,7 @@
 // Old temperature sensor setting, use as spare sensor.
 #define tempSensorPin 4
 
-#define sda_pin 21
+#define sda_pin 21   
 #define scl_pin 22
 
 // I2C Address

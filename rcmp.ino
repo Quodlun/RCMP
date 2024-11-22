@@ -123,7 +123,7 @@ int getFingerprintID() {
   } else if (p == FINGERPRINT_OK) {  // 成功狀態
     Serial.println("指紋檢測成功");
   } else {
-    Serial.println("指紋檢測失敗");
+    Serial.println("指紋檢測失敗"); 
     return -1;
   }
 

@@ -1,4 +1,6 @@
 #include <WiFi.h>
+#include <WiFiClient.h>
+#include <TridentTD_LineNotify.h>
 #include "ExternVariable.h"
 
 void setup ()
@@ -17,9 +19,18 @@ void setup ()
 
   Serial.println ( "WiFi status:" );
   WiFi.printDiag ( Serial );
+
+  lineNotifySetup ()
 }
 
 void loop ()
 {
   delay ( 1000 );
+}
+
+void lineNotifySetup ()
+{
+  Serial.println ( LINE.getVersion () );
+  LINE.setToken ( LINE_TOKEN );
+  LINE.notify ( "Line Notify Checked." );
 }

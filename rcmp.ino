@@ -1,9 +1,11 @@
 #include <WiFi.h>
+#include <WiFiClient.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <DFRobot_MLX90614.h>
 #include <HardwareSerial.h>
-#include <Adafruit_Fingerprint.h>  
+#include <Adafruit_Fingerprint.h>
+#include <TridentTD_LineNotify.h>
 #include "ExternVariable.h"
 #include "PinMap.h"
 
@@ -69,6 +71,7 @@ delay(500);
 
 }
 
+// Wi-Fi 初始化
 void wifiSetup ()
 {
   WiFi.begin ( ssid, password );
@@ -86,6 +89,7 @@ void wifiSetup ()
   WiFi.printDiag ( Serial );
 }
 
+// LCD 初始化
 void lcdSetup ()
 {
   lcd.init ();
@@ -98,6 +102,7 @@ void lcdSetup ()
   lcd.clear ();
 }
 
+// 抽水馬達初始化
 void bumperSetup ()
 {
   pinMode ( bumperPin, OUTPUT );
@@ -105,17 +110,9 @@ void bumperSetup ()
   delay ( 500 );
 }
 
-void bumperWork ()
-{
-  digitalWrite ( bumperPin, LOW );
-  delay ( bumperDelay );
-  digitalWrite ( bumperPin, HIGH );
-
-  bumperWorked = true;
-}
-
 // 指紋傳感器初始化
-void fingerprint_setup() {
+void fingerprint_setup ()
+{
   mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
   
   if (finger.verifyPassword()) {
@@ -128,6 +125,16 @@ void fingerprint_setup() {
   finger.getTemplateCount(); // 讀取指紋模板數量
   Serial.print("已存儲的指紋數量："); 
   Serial.println(finger.templateCount);
+}
+
+// 抽水馬達運作
+void bumperWork ()
+{
+  digitalWrite ( bumperPin, LOW );
+  delay ( bumperDelay );
+  digitalWrite ( bumperPin, HIGH );
+
+  bumperWorked = true;
 }
 
 // 獲取指紋 ID 的副程式，包含狀態檢查和匹配

@@ -1,3 +1,4 @@
+#include <WiFi.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <DFRobot_MLX90614.h>
@@ -18,6 +19,7 @@ bool bumperWorked = false;
 void setup ()
 {
   Serial.begin(115200);
+  wifiSetup ();
   fingerprint_setup();  // 初始化指紋傳感器
   Serial.println("System Ready");
   sensor.begin();
@@ -67,6 +69,22 @@ delay(500);
 
 }
 
+void wifiSetup ()
+{
+  WiFi.begin ( ssid, password );
+  
+  while ( WiFi.status () != WL_CONNECTED )
+  {
+    delay ( 500 );
+    Serial.print ( "." );
+  }
+
+  Serial.print ( "\n IP: " );
+  Serial.println ( WiFi.localIP () );
+
+  Serial.println ( "WiFi status:" );
+  WiFi.printDiag ( Serial );
+}
 
 void lcdSetup ()
 {

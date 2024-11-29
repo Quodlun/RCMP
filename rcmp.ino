@@ -79,7 +79,7 @@ void wifiSetup ()
     Serial.print ( "." );
   }
 
-  Serial.print ( "\n IP: " );
+  Serial.print ( "\nIP: " );
   Serial.println ( WiFi.localIP () );
 
   Serial.println ( "WiFi status:" );

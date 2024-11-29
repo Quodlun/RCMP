@@ -4,7 +4,7 @@
 void setup ()
 {
   Serial.begin ( 115200 );
-  WiFi begin ( ssid, password );
+  WiFi.begin ( ssid, password );
   
   while ( WiFi.status () != WL_CONNECTED )
   {
@@ -13,13 +13,13 @@ void setup ()
   }
 
   Serial.print ( "\n IP: " );
-  Serial.println ( "WiFi.localIP () );
+  Serial.println ( WiFi.localIP () );
 
-  Serial,println ( "WiFi status:" );
+  Serial.println ( "WiFi status:" );
   WiFi.printDiag ( Serial );
 }
 
-void void loop ()
+void loop ()
 {
   delay ( 1000 );
 }

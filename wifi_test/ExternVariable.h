@@ -5,8 +5,8 @@
 extern const int bumperDelay = 1000;
 
 extern const char* LINE_TOKEN = "K7YFufx6idzkQiz6mNfiz8oUde7Kp8cT7xte50QQ3kmK7YFufx6idzkQiz6mNfiz8oUde7Kp8cT7xte50QQ3km";
-extern const char* ssid = "FuNet-UAP";
-extern const char* password = "25785657";
+extern const char* ssid = "When Can My Internet Get Better";
+extern const char* password = "O00O00O0";
 
 extern const char* ntpServer = "time.google.com";
 extern const long gmtOffset_sec = 28800;

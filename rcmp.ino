@@ -13,10 +13,6 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 LiquidCrystal_I2C lcd ( LCD_I2C_ADDR, 16, 2 );
 DFRobot_MLX90614_I2C sensor ( MLX90614_I2C_ADDR , &Wire );
 
-/// @public 公開變數
-float objectTemp = 0;
-bool bumperWorked = false;
-
 void setup ()
 {
   Serial.begin(115200);
@@ -32,41 +28,40 @@ void setup ()
 
 void loop ()
 {
-char tempResult[6];
-sprintf(tempResult, "%4.2f", sensor.getObjectTempCelsius());
-lcd.clear();
+  sprintf(tempResult, "%4.2f", sensor.getObjectTempCelsius());
+  lcd.clear();
 
-int fingerprintID = getFingerprintID();
-if (fingerprintID >= 0) {
-  Serial.print("識別到指紋，ID: ");
-  Serial.println(fingerprintID);
+  int fingerprintID = getFingerprintID();
+  if (fingerprintID >= 0) {
+    Serial.print("識別到指紋，ID: ");
+    Serial.println(fingerprintID);
 
-  lcd.setCursor(0, 0);
-  lcd.print("Waiting for IR");
+    lcd.setCursor(0, 0);
+    lcd.print("Waiting for IR");
 
-  // 等待IR传感器检测到目标
-  while (digitalRead(irSensorPin) != LOW) {
-    delay(100); // 每100ms检查一次，避免频繁轮询
+    // 等待IR传感器检测到目标
+    while (digitalRead(irSensorPin) != LOW) {
+      delay(100); // 每100ms检查一次，避免频繁轮询
+    }
+
+    // 检测到IR信号后执行操作
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Detected");
+    lcd.setCursor(0, 1);
+    lcd.print(tempResult);
+
+    delay(2000); // 延迟2秒等待 bumper 检测
+    bumperWorked = false;
+    while (!bumperWorked) {
+    bumperWork();
+  }
+    delay(1000); // 每秒检查一次
+  } else {
+    Serial.println("No Match Found");
   }
 
-  // 检测到IR信号后执行操作
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Detected");
-  lcd.setCursor(0, 1);
-  lcd.print(tempResult);
-
-  delay(2000); // 延迟2秒等待 bumper 检测
-  bumperWorked = false;
-  while (!bumperWorked) {
-  bumperWork();
-}
-  delay(1000); // 每秒检查一次
-} else {
-  Serial.println("No Match Found");
-}
-
-delay(500);
+  delay(500);
 
 }
 

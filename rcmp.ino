@@ -4,6 +4,7 @@
 #include <HardwareSerial.h>
 #include <Adafruit_Fingerprint.h>
 #include <Discord_WebHook.h>
+#include <time.h>
 #include "ExternVariable.h"
 #include "PinMap.h"
 
@@ -23,18 +24,21 @@ void setup ()
   pinMode ( irSensorPin, INPUT );
   bumperSetup ();
   lcdSetup ();
+  timeSetup ()
   bumperWork ();
 }
 
 void loop ()
 {
-  sprintf(tempResult, "%4.2f", sensor.getObjectTempCelsius());
   lcd.clear();
 
   int fingerprintID = getFingerprintID();
-  if (fingerprintID >= 0) {
+  if (fingerprintID >= 0)
+  {
     Serial.print("識別到指紋，ID: ");
     Serial.println(fingerprintID);
+
+    localTime ();
 
     lcd.setCursor(0, 0);
     lcd.print("Waiting for IR");
@@ -44,12 +48,17 @@ void loop ()
       delay(100); // 每100ms检查一次，避免频繁轮询
     }
 
+    sprintf(tempResult, "%4.2f", sensor.getObjectTempCelsius());
+
     // 检测到IR信号后执行操作
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Detected");
     lcd.setCursor(0, 1);
     lcd.print(tempResult);
+
+    discord.send ( timeResult );
+    discord.send ( tempResult );
 
     delay(2000); // 延迟2秒等待 bumper 检测
     bumperWorked = false;
@@ -123,6 +132,12 @@ void discordWebHookSetup ()
   }
 }
 
+/// @brief NTP 初始化
+void timeSetup ()
+{
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+}
+
 /// @brief 泵浦運作
 void bumperWork ()
 {
@@ -158,4 +173,17 @@ int getFingerprintID() {
     Serial.println("未找到匹配的指紋");
     return -1;
   }
+}
+
+/// @brief NTP 讀取時間
+void localTime()
+{
+  time_t rawTime;
+  struct tm *info;
+
+  time(&rawTime);
+
+  info = localtime(&rawTime);
+
+  strftime(timeResult, sizeof(timeResult), "%Y-%m-%d %H:%M", info);
 }

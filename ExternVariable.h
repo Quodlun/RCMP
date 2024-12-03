@@ -6,6 +6,7 @@ extern int bumperDelay = 1000;
 extern float objectTemp = 0;
 extern bool bumperWorked = false;
 extern char tempResult [];
+extern char timeResult [];
 
 extern const char* DISCORD_WEBHOOK = "https://discordapp.com/api/webhooks/1313348368633827338/3n9_-o7_LR6bJjSLt-h638emCgcHlqqUb2GjnR5IK9rdPX_ATiet35Mcmq_60YVWFH9N";
 extern const char* ssid = "FuNet-UAP";

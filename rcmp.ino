@@ -2,23 +2,26 @@
 #include <LiquidCrystal_I2C.h>
 #include <DFRobot_MLX90614.h>
 #include <HardwareSerial.h>
-#include <Adafruit_Fingerprint.h>  
+#include <Adafruit_Fingerprint.h>
+#include <Discord_WebHook.h>
 #include "ExternVariable.h"
 #include "PinMap.h"
 
-// 指紋傳感器設置
+/// @brief Class 創建
 HardwareSerial mySerial(1); // 使用 ESP32 的第二個串口（UART1）
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 LiquidCrystal_I2C lcd ( LCD_I2C_ADDR, 16, 2 );
 DFRobot_MLX90614_I2C sensor ( MLX90614_I2C_ADDR , &Wire );
 
+/// @public 公開變數
 float objectTemp = 0;
 bool bumperWorked = false;
 
 void setup ()
 {
   Serial.begin(115200);
-  fingerprint_setup();  // 初始化指紋傳感器
+  discordWebHookSetup ();
+  fingerprintSetup();  // 初始化指紋傳感器
   Serial.println("System Ready");
   sensor.begin();
   pinMode ( irSensorPin, INPUT );
@@ -67,7 +70,7 @@ delay(500);
 
 }
 
-
+/// @brief LCD 初始化
 void lcdSetup ()
 {
   lcd.init ();
@@ -80,6 +83,7 @@ void lcdSetup ()
   lcd.clear ();
 }
 
+/// @brief 泵浦初始化
 void bumperSetup ()
 {
   pinMode ( bumperPin, OUTPUT );
@@ -87,17 +91,8 @@ void bumperSetup ()
   delay ( 500 );
 }
 
-void bumperWork ()
-{
-  digitalWrite ( bumperPin, LOW );
-  delay ( bumperDelay );
-  digitalWrite ( bumperPin, HIGH );
-
-  bumperWorked = true;
-}
-
-// 指紋傳感器初始化
-void fingerprint_setup() {
+/// @brief 指紋傳感器初始化
+void fingerprintSetup() {
   mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
   
   if (finger.verifyPassword()) {
@@ -112,7 +107,38 @@ void fingerprint_setup() {
   Serial.println(finger.templateCount);
 }
 
-// 獲取指紋 ID 的副程式，包含狀態檢查和匹配
+/// @brief Discord WebHook 初始化
+void discordWebHookSetup ()
+{
+  discord.begin ( DISCORD_WEBHOOK );
+  discord.disableDebug ();
+  discord.addWiFi ( ssid, password );
+  discord.connectWiFi ();
+
+  bool message_sent = discord.send ( "Discord WebHook Confirm" );
+
+  if ( message_sent )
+  {
+    Serial.println("Message sent");
+  }
+  
+  else
+  {
+    Serial.println("I AM ERROR");
+  }
+}
+
+/// @brief 泵浦運作
+void bumperWork ()
+{
+  digitalWrite ( bumperPin, LOW );
+  delay ( bumperDelay );
+  digitalWrite ( bumperPin, HIGH );
+
+  bumperWorked = true;
+}
+
+/// @brief 獲取指紋 ID 的副程式，包含狀態檢查和匹配
 int getFingerprintID() {
   uint8_t p = finger.getImage();
 

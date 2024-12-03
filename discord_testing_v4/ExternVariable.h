@@ -1,0 +1,15 @@
+#ifndef EXTERNVARIABLE_H
+#define EXTERNVARIABLE_H
+
+
+extern const int bumperDelay = 1000;
+
+extern const char* DISCORD_WEBHOOK = "https://discordapp.com/api/webhooks/1313348368633827338/3n9_-o7_LR6bJjSLt-h638emCgcHlqqUb2GjnR5IK9rdPX_ATiet35Mcmq_60YVWFH9N";
+extern const char* ssid = "FuNet-UAP";
+extern const char* password = "25785657";
+
+extern const char* ntpServer = "time.google.com";
+extern const long gmtOffset_sec = 28800;
+extern const int daylightOffset_sec = 0;
+
+#endif

@@ -70,9 +70,9 @@ void loop ()
 }
 
 
-/// @subsection 初始化模組
+/// @section 初始化模組
 
-  /// @subsubsection LCD 初始化
+  /// @subsection LCD 初始化
 void lcdSetup ()
 {
   lcd.init ();
@@ -85,7 +85,7 @@ void lcdSetup ()
   lcd.clear ();
 }
 
-  /// @subsubsection 泵浦初始化
+  /// @subsection 泵浦初始化
 void bumperSetup ()
 {
   pinMode ( bumperPin, OUTPUT );
@@ -93,7 +93,7 @@ void bumperSetup ()
   delay ( 500 );
 }
 
-  /// @subsubsection 指紋傳感器初始化
+  /// @subsection 指紋傳感器初始化
 void fingerprintSetup() {
   mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
   
@@ -109,7 +109,7 @@ void fingerprintSetup() {
   Serial.println(finger.templateCount);
 }
 
-  /// @subsubsection Discord WebHook 初始化
+  /// @subsection Discord WebHook 初始化
 void discordWebHookSetup ()
 {
   discord.begin ( DISCORD_WEBHOOK );
@@ -130,16 +130,16 @@ void discordWebHookSetup ()
   }
 }
 
-  /// @subsubsection NTP 初始化
+  /// @subsection NTP 初始化
 void timeSetup ()
 {
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
 
-/// @subsection 執行模組
+/// @section 執行模組
 
-  /// @subsubsection 泵浦運作
+  /// @subsection 泵浦運作
 void bumperWork ()
 {
   digitalWrite ( bumperPin, LOW );
@@ -149,7 +149,7 @@ void bumperWork ()
   bumperWorked = true;
 }
 
-  /// @subsubsection 獲取指紋 ID 的副程式，包含狀態檢查和匹配
+  /// @subsection 獲取指紋 ID 的副程式，包含狀態檢查和匹配
 int getFingerprintID () {
   uint8_t p = finger.getImage();
 
@@ -176,7 +176,7 @@ int getFingerprintID () {
   }
 }
 
-  /// @subsubsection NTP 讀取時間
+  /// @subsection NTP 讀取時間
 void localTime ()
 {
   time_t rawTime;
@@ -189,7 +189,7 @@ void localTime ()
   strftime(timeResult, sizeof(timeResult), "%Y-%m-%d %H:%M", info);
 }
 
-  /// @subsubsection 檢測到IR後動作
+  /// @subsection 檢測到IR後動作
 void functionAfterIR ()
 {
   sprintf ( tempResult, "%4.2f", sensor.getObjectTempCelsius () );

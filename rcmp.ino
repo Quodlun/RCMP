@@ -130,8 +130,15 @@ int getFingerprintID() {
   // 搜尋指紋匹配
   p = finger.fingerFastSearch();  // 使用快速搜尋函數
   if (p == FINGERPRINT_OK) {  // 匹配成功
-    Serial.print("找到匹配的指紋，ID #"); 
-    Serial.println(finger.fingerID);
+    Serial.print("找到匹配的指紋"); 
+
+    ClassInfo info = classArray[finger.fingerID - 1]; // 陣列從 0 開始，ID 從 1 開始
+    
+    Serial.print("座號: ");
+    Serial.println(info.seatNumber);
+    Serial.print("姓名: ");
+    Serial.println(info.name);  // 顯示學生姓名
+
     return finger.fingerID;
   } else {
     Serial.println("未找到匹配的指紋");

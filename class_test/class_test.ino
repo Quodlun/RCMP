@@ -38,14 +38,7 @@ void loop() {
         // 檢查學號是否有效
         if (id > 0 && id <= sizeof(classArray) / sizeof(classArray[0])) {
             // 如果找到該學號，顯示班級名稱、座號和姓名
-            ClassInfo info = classArray[id - 1]; // 陣列從 0 開始，ID 從 1 開始
-            Serial.print("班級名稱: ");
-            Serial.println(info.className);
-            Serial.print("座號: ");
-            Serial.println(info.seatNumber);
-            Serial.print("姓名: ");
-            Serial.println(info.name);  // 顯示學生姓名
-        } else {
+            } else {
             // 如果找不到該學號
             Serial.println("查無此ID，請再試一次！");
         }

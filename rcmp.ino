@@ -7,6 +7,7 @@
 #include <time.h>
 #include "ExternVariable.h"
 #include "PinMap.h"
+#include "Settings.h"
 
 /// @section Class 創建
 Discord_Webhook discord;

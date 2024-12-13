@@ -209,7 +209,7 @@ void functionAfterIR ()
   discord.send ( timeResult );
   discord.send ( tempResult );
 
-  delay ( 2000 ); /// @brief 延迟2秒等待 bumper 检测
+  delay ( 50 ); /// @brief 延迟2秒等待 bumper 检测
   bumperWorked = false;
 
   while ( !bumperWorked )

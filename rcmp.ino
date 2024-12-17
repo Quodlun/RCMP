@@ -67,6 +67,56 @@ void loop()
   delay(500);
 }
 
+void classCreate()
+{
+  Serial.begin(115200);
+
+  sensor.begin();
+  pinMode(irSensorPin, INPUT);
+
+  discordWebHookSetup();
+  timeSetup();
+  fingerprintSetup();
+  bumperSetup();
+  lcdSetup();
+  bumperWork();
+}
+
+void loop()
+{
+  lcd.clear();
+
+  int fingerprintID = getFingerprintID();
+
+  if (fingerprintID >= 0)
+  {
+    Serial.print("識別到指紋，ID: ");
+    Serial.println(fingerprintID);
+
+    localTime();
+
+    lcd.setCursor(0, 0);
+    lcd.print("Waiting for IR");
+
+    // 等待IR传感器检测到目标
+    while (digitalRead(irSensorPin) != LOW)
+    {
+      delay(100); // 每100ms检查一次，避免频繁轮询
+    }
+
+    functionAfterIR();
+
+    delay(1000); // 每秒检查一次
+  }
+
+  else
+  {
+    Serial.println("No Match Found");
+  }
+
+  delay(500);
+}
+
 void lcdSetup()
 {
   lcd.init();
@@ -98,7 +148,7 @@ void bumperWork()
 // 指紋傳感器初始化
 void fingerprintSetup()
 {
-  mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
+  Serial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
 
   if (finger.verifyPassword())
   {
@@ -121,7 +171,7 @@ void fingerprintSetup()
 /// @subsection Discord WebHook 初始化
 void discordWebHookSetup()
 {
-  discord.begin(DISCORD_WEBHOOK);
+  discord.begin(Discord_Webhook);
   discord.disableDebug();
   discord.addWiFi(ssid, password);
   discord.connectWiFi();

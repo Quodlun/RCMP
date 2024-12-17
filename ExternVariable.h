@@ -2,10 +2,10 @@
 #define EXTERNVARIABLE_H
 
 extern int bumperDelay = 1000;
-// extern int fingerprintID;
+extern int fingerprintID;
 extern float objectTemp = 0;
 extern bool bumperWorked = false;
-// extern char tempResult [];
-// extern char timeResult [17];
+extern char tempResult [ 7 ];
+extern char timeResult [17];
 
 #endif

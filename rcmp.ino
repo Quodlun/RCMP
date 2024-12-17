@@ -126,7 +126,7 @@ void fingerprintSetup()
 /// @subsection Discord WebHook 初始化
 void discordWebHookSetup()
 {
-  discord.begin(Discord_WebHook);
+  discord.begin(Discord_Webhook);
   discord.disableDebug();
   discord.addWiFi(ssid, password);
   discord.connectWiFi();

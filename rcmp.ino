@@ -5,6 +5,7 @@
 #include <Adafruit_Fingerprint.h>
 #include "ExternVariable.h"
 #include "PinMap.h"
+#include "FingerPrintClass.h"
 
 // 指紋傳感器設置
 HardwareSerial mySerial(1); // 使用 ESP32 的第二個串口（UART1）

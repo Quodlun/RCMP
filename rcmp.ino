@@ -10,59 +10,6 @@
 #include "Settings.h"
 #include "FingerPrintClass.h"
 
-/// @section Class 創建
-classCreate();
-
-void setup()
-{
-  Serial.begin(115200);
-
-  sensor.begin();
-  pinMode(irSensorPin, INPUT);
-
-  discordWebHookSetup();
-  timeSetup();
-  fingerprintSetup();
-  bumperSetup();
-  lcdSetup();
-  bumperWork();
-}
-
-void loop()
-{
-  lcd.clear();
-
-  int fingerprintID = getFingerprintID();
-
-  if (fingerprintID >= 0)
-  {
-    Serial.print("識別到指紋，ID: ");
-    Serial.println(fingerprintID);
-
-    localTime();
-
-    lcd.setCursor(0, 0);
-    lcd.print("Waiting for IR");
-
-    // 等待IR传感器检测到目标
-    while (digitalRead(irSensorPin) != LOW)
-    {
-      delay(100); // 每100ms检查一次，避免频繁轮询
-    }
-
-    functionAfterIR();
-
-    delay(1000); // 每秒检查一次
-  }
-
-  else
-  {
-    Serial.println("No Match Found");
-  }
-
-  delay(500);
-}
-
 void classCreate()
 {
   Discord_Webhook discord;
@@ -240,4 +187,57 @@ void functionAfterIR()
   {
     bumperWork();
   }
+}
+
+/// @section Class 創建
+classCreate();
+
+void setup()
+{
+  Serial.begin(115200);
+
+  sensor.begin();
+  pinMode(irSensorPin, INPUT);
+
+  discordWebHookSetup();
+  timeSetup();
+  fingerprintSetup();
+  bumperSetup();
+  lcdSetup();
+  bumperWork();
+}
+
+void loop()
+{
+  lcd.clear();
+
+  int fingerprintID = getFingerprintID();
+
+  if (fingerprintID >= 0)
+  {
+    Serial.print("識別到指紋，ID: ");
+    Serial.println(fingerprintID);
+
+    localTime();
+
+    lcd.setCursor(0, 0);
+    lcd.print("Waiting for IR");
+
+    // 等待IR传感器检测到目标
+    while (digitalRead(irSensorPin) != LOW)
+    {
+      delay(100); // 每100ms检查一次，避免频繁轮询
+    }
+
+    functionAfterIR();
+
+    delay(1000); // 每秒检查一次
+  }
+
+  else
+  {
+    Serial.println("No Match Found");
+  }
+
+  delay(500);
 }

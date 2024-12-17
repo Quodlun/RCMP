@@ -10,7 +10,7 @@
 #include "Settings.h"
 #include "FingerPrintClass.h"
 
-/// @section Class 創建
+// @section Class 創建
 classCreate();
 
 void setup()
@@ -103,7 +103,7 @@ void bumperWork()
 // 指紋傳感器初始化
 void fingerprintSetup()
 {
-  mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
+  Serial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
 
   if (finger.verifyPassword())
   {

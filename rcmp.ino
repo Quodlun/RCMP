@@ -17,6 +17,9 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 LiquidCrystal_I2C lcd(LCD_I2C_ADDR, 16, 2);
 DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 
+char tempResult [ 7 ];
+char timeResult [17];
+
 void setup()
 {
   Serial.begin(115200);

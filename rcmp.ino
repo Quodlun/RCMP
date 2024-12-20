@@ -162,18 +162,6 @@ void timeSetup()
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
-/// @section 執行模組
-
-/// @subsection 泵浦運作
-void bumperWork()
-{
-  digitalWrite(bumperPin, LOW);
-  delay(bumperDelay);
-  digitalWrite(bumperPin, HIGH);
-
-  bumperWorked = true;
-}
-
 // 獲取指紋 ID 的副程式，包含狀態檢查和匹配
 int getFingerprintID()
 {

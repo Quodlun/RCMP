@@ -8,8 +8,26 @@
 #include "ExternVariable.h"
 #include "PinMap.h"
 #include "Settings.h"
-#include "FingerPrintClass.h"
+//#include "FingerPrintClass.h"
 
+
+struct ClassInfo
+{
+    int seatNumber; // 座號
+    String name;    // 學生姓名
+
+    // 建構函數，初始化班級名稱、座號和姓名
+    ClassInfo(int seat, String studentName) : seatNumber(seat), name(studentName) {}
+};
+
+ClassInfo classArray[] =
+{
+    ClassInfo(8, "呂吉堂"),
+    ClassInfo(9, "曹銘洲"),
+    ClassInfo(11, "傅威禮"),
+    ClassInfo(12, "李佳諺")};
+char tempResult [ 7 ];
+char timeResult [17];
 /// @section Class 創建
 Discord_Webhook discord;
 HardwareSerial mySerial(1); /// @brief 使用 ESP32 的第二個串口（UART1）
@@ -19,6 +37,7 @@ DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 
 void setup()
 {
+
   Serial.begin(115200);
 
   sensor.begin();

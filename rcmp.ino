@@ -76,12 +76,11 @@ void loop()
   {
     Serial.print("識別到指紋，ID: ");
     Serial.println(fingerprintID);
-
-    localTime();
-
+    
     lcd.setCursor(0, 0);
     lcd.print("請將手放置在噴頭位置");
-
+    localTime();
+   
     // 等待IR传感器检测到目标
     while (digitalRead(irSensorPin) != LOW)
     {
@@ -232,7 +231,7 @@ void functionAfterIR()
   /// @brief 检测到IR信号后执行操作
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Detected");
+  lcd.print("體溫");
   lcd.setCursor(0, 1);
   lcd.print(tempResult);
 

@@ -86,15 +86,6 @@ void bumperSetup()
   delay(500);
 }
 
-void bumperWork()
-{
-  digitalWrite(bumperPin, LOW);
-  delay(bumperDelay);
-  digitalWrite(bumperPin, HIGH);
-
-  bumperWorked = true;
-}
-
 // 指紋傳感器初始化
 void fingerprintSetup()
 {

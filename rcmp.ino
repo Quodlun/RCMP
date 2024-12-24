@@ -25,9 +25,14 @@ ClassInfo classArray[] =
     ClassInfo(8, "呂吉堂"),
     ClassInfo(9, "曹銘洲"),
     ClassInfo(11, "傅威禮"),
-    ClassInfo(12, "李佳諺")};
+    ClassInfo(12, "李佳諺")
+};
+
 char tempResult [ 7 ];
 char timeResult [17];
+char seatNumberResult [ 7 ];
+char nameResult [ 8 ];
+
 /// @section Class 創建
 Discord_Webhook discord;
 HardwareSerial mySerial(1); /// @brief 使用 ESP32 的第二個串口（UART1）
@@ -75,7 +80,7 @@ void loop()
     localTime();
 
     lcd.setCursor(0, 0);
-    lcd.print("Waiting for IR");
+    lcd.print("請將手放置在噴頭位置");
 
     // 等待IR传感器检测到目标
     while (digitalRead(irSensorPin) != LOW)
@@ -188,10 +193,13 @@ int getFingerprintID()
 
     ClassInfo info = classArray[finger.fingerID - 1]; // 陣列從 0 開始，ID 從 1 開始
 
-    Serial.print("座號: ");
-    Serial.println(info.seatNumber);
-    Serial.print("姓名: ");
-    Serial.println(info.name); // 顯示學生姓名
+    sprintf(seatNumberResult, "座號: %d", info.seatNumber );
+    Serial.print(seatNumberResult);
+    discord.send(seatNumberResult);
+
+    sprintf(nameResult, "姓名: %s", info.name );
+    Serial.println(nameResult);
+    discord.send(nameResult); // 顯示學生姓名
 
     return finger.fingerID;
   }

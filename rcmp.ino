@@ -10,8 +10,12 @@
 #include "Settings.h"
 #include "FingerPrintClass.h"
 
-// @section Class 創建
-classCreate();
+/// @section Class 創建
+Discord_Webhook discord;
+HardwareSerial mySerial(1); /// @brief 使用 ESP32 的第二個串口（UART1）
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
+LiquidCrystal_I2C lcd(LCD_I2C_ADDR, 16, 2);
+DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 
 void setup()
 {
@@ -61,15 +65,6 @@ void loop()
   }
 
   delay(500);
-}
-
-void classCreate()
-{
-  Discord_Webhook discord;
-  HardwareSerial mySerial(1); /// @brief 使用 ESP32 的第二個串口（UART1）
-  Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
-  LiquidCrystal_I2C lcd(LCD_I2C_ADDR, 16, 2);
-  DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 }
 
 void lcdSetup()

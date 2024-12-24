@@ -39,17 +39,27 @@ void setup()
 {
 
   Serial.begin(115200);
-
   sensor.begin();
   pinMode(irSensorPin, INPUT);
 
   discordWebHookSetup();
   timeSetup();
-  // fingerprintSetup();
+  //fingerprintSetup();
   bumperSetup();
   lcdSetup();
   bumperWork();
+  mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
+
+  if (finger.verifyPassword())
+  {
+    Serial.println("指紋傳感器連接成功！");
+  }
+  else
+  {
+    Serial.println("無法找到指紋傳感器，請檢查接線和連接。");
+  }
 }
+
 
 void loop()
 {
@@ -104,7 +114,7 @@ void bumperSetup()
   digitalWrite(bumperPin, HIGH);
   delay(500);
 }
-
+/*
 // 指紋傳感器初始化
 void fingerprintSetup()
 {
@@ -117,17 +127,9 @@ void fingerprintSetup()
   else
   {
     Serial.println("無法找到指紋傳感器，請檢查接線和連接。");
-    while (1)
-    {
-      delay(1);
-    }
   }
-
-  finger.getTemplateCount(); // 讀取指紋模板數量
-  Serial.print("已存儲的指紋數量：");
-  Serial.println(finger.templateCount);
 }
-
+*/
 /// @subsection Discord WebHook 初始化
 void discordWebHookSetup()
 {
@@ -171,32 +173,13 @@ int getFingerprintID()
   else if (p == FINGERPRINT_OK)
   { // 成功狀態
     Serial.println("指紋檢測成功");
-    p = finger.fingerFastSearch(); // 使用快速搜尋函數
-    if (p == FINGERPRINT_OK)
-    { // 匹配成功
-      Serial.print("找到匹配的指紋");
-
-      ClassInfo info = classArray[finger.fingerID - 1]; // 陣列從 0 開始，ID 從 1 開始
-
-      Serial.print("座號: ");
-      Serial.println(info.seatNumber);
-      Serial.print("姓名: ");
-      Serial.println(info.name); // 顯示學生姓名
-
-      return finger.fingerID;
-    }
-    else
-    {
-      Serial.println("未找到匹配的指紋");
-      return -1;
-    }
   }
   else
   {
     Serial.println("指紋檢測失敗");
     return -1;
   }
-  /*
+  
   // 搜尋指紋匹配
   p = finger.fingerFastSearch(); // 使用快速搜尋函數
   if (p == FINGERPRINT_OK)
@@ -217,7 +200,7 @@ int getFingerprintID()
     Serial.println("未找到匹配的指紋");
     return -1;
   }
-  */
+  
 }
 
 /// @subsection NTP 讀取時間

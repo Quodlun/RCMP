@@ -126,22 +126,12 @@ void fingerprintSetup()
 /// @subsection Discord WebHook 初始化
 void discordWebHookSetup()
 {
-  discord.begin(Discord_Webhook);
+  discord.begin(discordWebhook);
   discord.disableDebug();
   discord.addWiFi(ssid, password);
   discord.connectWiFi();
 
   bool message_sent = discord.send("Discord WebHook Confirm");
-
-  if (message_sent)
-  {
-    Serial.println("Message sent");
-  }
-
-  else
-  {
-    Serial.println("I AM ERROR");
-  }
 }
 
 /// @subsection NTP 初始化

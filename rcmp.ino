@@ -45,7 +45,7 @@ void setup()
 
   discordWebHookSetup();
   timeSetup();
-  fingerprintSetup();
+  // fingerprintSetup();
   bumperSetup();
   lcdSetup();
   bumperWork();
@@ -54,7 +54,7 @@ void setup()
 void loop()
 {
   lcd.clear();
-
+/*
   int fingerprintID = getFingerprintID();
 
   if (fingerprintID >= 0)
@@ -65,7 +65,7 @@ void loop()
     localTime();
 
     lcd.setCursor(0, 0);
-    lcd.print("Waiting for IR");
+    lcd.print("Waiting for IR"); */
 
     // 等待IR传感器检测到目标
     while (digitalRead(irSensorPin) != LOW)
@@ -76,7 +76,7 @@ void loop()
     functionAfterIR();
 
     delay(1000); // 每秒检查一次
-  }
+  /*}
 
   else
   {
@@ -84,7 +84,7 @@ void loop()
   }
 
   delay(500);
-}
+}*/
 
 void lcdSetup()
 {

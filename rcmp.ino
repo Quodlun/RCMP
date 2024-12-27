@@ -49,20 +49,10 @@ void setup()
 
   discordWebHookSetup();
   timeSetup();
-  //fingerprintSetup();
+  fingerprintSetup();
   bumperSetup();
   lcdSetup();
   bumperWork();
-  mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
-
-  if (finger.verifyPassword())
-  {
-    Serial.println("指紋傳感器連接成功！");
-  }
-  else
-  {
-    Serial.println("無法找到指紋傳感器，請檢查接線和連接。");
-  }
 }
 
 
@@ -77,13 +67,12 @@ void loop()
     Serial.print("識別到指紋，ID: ");
     Serial.println(fingerprintID);
     
-    lcd.setCursor(0, 0);
-    lcd.print("請將手放置在噴頭位置");
-    localTime();
-   
     // 等待IR传感器检测到目标
     while (digitalRead(irSensorPin) != LOW)
     {
+      lcd.setCursor(0, 0);
+      lcd.print("請將手放置在噴頭位置");
+      localTime();
       delay(100); // 每100ms检查一次，避免频繁轮询
     }
 
@@ -118,11 +107,11 @@ void bumperSetup()
   digitalWrite(bumperPin, HIGH);
   delay(500);
 }
-/*
+
 // 指紋傳感器初始化
 void fingerprintSetup()
 {
-  Serial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
+  mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
 
   if (finger.verifyPassword())
   {
@@ -133,7 +122,7 @@ void fingerprintSetup()
     Serial.println("無法找到指紋傳感器，請檢查接線和連接。");
   }
 }
-*/
+
 /// @subsection Discord WebHook 初始化
 void discordWebHookSetup()
 {

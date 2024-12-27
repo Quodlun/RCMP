@@ -46,11 +46,7 @@ void setup()
 
   discordWebHookSetup();
   timeSetup();
-<<<<<<< HEAD
   fingerprintSetup();
-=======
-  // fingerprintSetup();
->>>>>>> b3f4695bb174eb069742745723bd684d509b51a3
   bumperSetup();
   lcdSetup();
   bumperWork();
@@ -66,15 +62,11 @@ void loop()
   {
     Serial.print("識別到指紋，ID: ");
     Serial.println(fingerprintID);
-<<<<<<< HEAD
-    
-=======
+
 
     lcd.setCursor(0, 0);
     lcd.print("請將手放置在噴頭位置");
     localTime();
-
->>>>>>> b3f4695bb174eb069742745723bd684d509b51a3
     // 等待IR传感器检测到目标
     while (digitalRead(irSensorPin) != LOW)
     {

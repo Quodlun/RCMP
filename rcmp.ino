@@ -8,30 +8,28 @@
 #include "ExternVariable.h"
 #include "PinMap.h"
 #include "Settings.h"
-//#include "FingerPrintClass.h"
-
+// #include "FingerPrintClass.h"
 
 struct ClassInfo
 {
-    int seatNumber; // 座號
-    String name;    // 學生姓名
+  int seatNumber; // 座號
+  String name;    // 學生姓名
 
-    // 建構函數，初始化班級名稱、座號和姓名
-    ClassInfo(int seat, String studentName) : seatNumber(seat), name(studentName) {}
+  // 建構函數，初始化班級名稱、座號和姓名
+  ClassInfo(int seat, String studentName) : seatNumber(seat), name(studentName) {}
 };
 
 ClassInfo classArray[] =
-{
-    ClassInfo(8, "呂吉堂"),
-    ClassInfo(9, "曹銘洲"),
-    ClassInfo(11, "傅威禮"),
-    ClassInfo(12, "李佳諺")
-};
+    {
+        ClassInfo(8, "呂吉堂"),
+        ClassInfo(9, "曹銘洲"),
+        ClassInfo(11, "傅威禮"),
+        ClassInfo(12, "李佳諺")};
 
-char tempResult [ 7 ];
-char timeResult [17];
-char seatNumberResult [ 7 ];
-char nameResult [ 8 ];
+char tempResult[7];
+char timeResult[17];
+char seatNumberResult[7];
+char nameResult[8];
 
 /// @section Class 創建
 Discord_Webhook discord;
@@ -42,19 +40,21 @@ DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 
 void setup()
 {
-
   Serial.begin(115200);
   sensor.begin();
   pinMode(irSensorPin, INPUT);
 
   discordWebHookSetup();
   timeSetup();
+<<<<<<< HEAD
   fingerprintSetup();
+=======
+  // fingerprintSetup();
+>>>>>>> b3f4695bb174eb069742745723bd684d509b51a3
   bumperSetup();
   lcdSetup();
   bumperWork();
 }
-
 
 void loop()
 {
@@ -66,7 +66,15 @@ void loop()
   {
     Serial.print("識別到指紋，ID: ");
     Serial.println(fingerprintID);
+<<<<<<< HEAD
     
+=======
+
+    lcd.setCursor(0, 0);
+    lcd.print("請將手放置在噴頭位置");
+    localTime();
+
+>>>>>>> b3f4695bb174eb069742745723bd684d509b51a3
     // 等待IR传感器检测到目标
     while (digitalRead(irSensorPin) != LOW)
     {
@@ -172,7 +180,7 @@ int getFingerprintID()
     Serial.println("指紋檢測失敗");
     return -1;
   }
-  
+
   // 搜尋指紋匹配
   p = finger.fingerFastSearch(); // 使用快速搜尋函數
   if (p == FINGERPRINT_OK)
@@ -181,11 +189,11 @@ int getFingerprintID()
 
     ClassInfo info = classArray[finger.fingerID - 1]; // 陣列從 0 開始，ID 從 1 開始
 
-    sprintf(seatNumberResult, "座號: %d", info.seatNumber );
+    sprintf(seatNumberResult, "座號: %d", info.seatNumber);
     Serial.print(seatNumberResult);
     discord.send(seatNumberResult);
 
-    sprintf(nameResult, "姓名: %s", info.name );
+    sprintf(nameResult, "姓名: %s", info.name);
     Serial.println(nameResult);
     discord.send(nameResult); // 顯示學生姓名
 
@@ -196,7 +204,6 @@ int getFingerprintID()
     Serial.println("未找到匹配的指紋");
     return -1;
   }
-  
 }
 
 /// @subsection NTP 讀取時間

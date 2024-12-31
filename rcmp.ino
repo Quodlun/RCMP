@@ -88,6 +88,7 @@ void loop()
 
       else
       {
+
         delay(1000);
         timer ++;
       }
@@ -284,7 +285,8 @@ int getFingerprintID()
   if (p == FINGERPRINT_OK)
   { // 匹配成功
     Serial.print("找到匹配的指紋");
-
+    lcd.clear();
+    lcd.print("Match successful");
     ClassInfo info = classArray[finger.fingerID - 1]; // 陣列從 0 開始，ID 從 1 開始
 
     sprintf(seatNumberResult, "座號: %d", info.seatNumber);
@@ -300,6 +302,11 @@ int getFingerprintID()
   else
   {
     Serial.println("未找到匹配的指紋");
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Warning: No such");
+    lcd.setCursor(0, 1);
+    lcd.print("person found");
     return -1;
   }
 }
@@ -326,7 +333,7 @@ void functionAfterIR()
   /// @brief LCD Print Temperature Result
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("體溫");
+  lcd.print("body temperature");
   lcd.setCursor(0, 1);
   lcd.print(tempResult);
 

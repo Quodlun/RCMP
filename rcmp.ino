@@ -5,17 +5,17 @@
 #include <Adafruit_Fingerprint.h>
 #include <Discord_WebHook.h>
 #include <time.h>
+
 #include "ExternVariable.h"
 #include "PinMap.h"
 #include "Settings.h"
-// #include "FingerPrintClass.h"
 
+/// @section Class Setup & Class Array Create
 struct ClassInfo
 {
-  int seatNumber; // 座號
-  String name;    // 學生姓名
+  int seatNumber;
+  String name;
 
-  // 建構函數，初始化班級名稱、座號和姓名
   ClassInfo(int seat, String studentName) : seatNumber(seat), name(studentName) {}
 };
 
@@ -26,18 +26,20 @@ ClassInfo classArray[] =
         ClassInfo(11, "傅威禮"),
         ClassInfo(12, "李佳諺")};
 
-char tempResult[7];
-char timeResult[17];
-char seatNumberResult[7];
-char nameResult[8];
-
-/// @section Class 創建
+/// @section Library Class Create
 Discord_Webhook discord;
 HardwareSerial mySerial(1); /// @brief 使用 ESP32 的第二個串口（UART1）
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 LiquidCrystal_I2C lcd(LCD_I2C_ADDR, 16, 2);
 DFRobot_MLX90614_I2C sensor(MLX90614_I2C_ADDR, &Wire);
 
+/// @section Variable Create
+char tempResult[7];
+char timeResult[17];
+char seatNumberResult[7];
+char nameResult[8];
+
+/// @section Setup
 void setup()
 {
   Serial.begin(115200);
@@ -50,12 +52,17 @@ void setup()
   bumperSetup();
   lcdSetup();
   bumperWork();
+
+  /// @brief Debugger
+  debug();
 }
 
+/// @section Main Code
 void loop()
 {
   lcd.clear();
 
+  /// @brief Fingerprint Sensor Work
   int fingerprintID = getFingerprintID();
 
   if (fingerprintID >= 0)
@@ -63,22 +70,21 @@ void loop()
     Serial.print("識別到指紋，ID: ");
     Serial.println(fingerprintID);
 
-
     lcd.setCursor(0, 0);
-    lcd.print("請將手放置在噴頭位置");
+
+    /// @brief Get Current Time
     localTime();
-    // 等待IR传感器检测到目标
+
+    /// @brief Wait For IR Signal
     while (digitalRead(irSensorPin) != LOW)
     {
-      lcd.setCursor(0, 0);
-      lcd.print("請將手放置在噴頭位置");
-      localTime();
-      delay(100); // 每100ms检查一次，避免频繁轮询
+      delay(100);
     }
 
+    /// @brief Other Component Work
     functionAfterIR();
 
-    delay(1000); // 每秒检查一次
+    delay(1000);
   }
 
   else
@@ -89,6 +95,97 @@ void loop()
   delay(500);
 }
 
+/// @section Debugger
+void debug(int debugCode)
+{
+  switch (debugCode)
+  {
+  /// @brief Serial
+  case 1:
+    Serial.print("Serial Test");
+
+    break;
+
+  /// @brief Bumper
+  case 2:
+    Serial.print(bumperDelay);
+
+    while (true)
+    {
+      digitalWrite(bumperPin, LOW);
+      delay(bumperDelay);
+      digitalWrite(bumperPin, HIGH);
+    }
+
+    break;
+
+  /// @brief LCD
+  case 3:
+    while (true)
+    {
+      lcd.setCursor(0, 0);
+      lcd.print("1234567890ABCDEF");
+      lcd.setCursor(0, 1);
+      lcd.print("1234567890ABCDEF");
+
+      delay(3000);
+      lcd.clear();
+    }
+
+    break;
+
+  /// @brief Discord WebHook
+  case 4:
+    discord.send("Discord WebHook Test");
+
+    break;
+
+  /// @brief IR Sensor
+  case 5:
+    while (true)
+    {
+      if (digitalRead(irSensorPin) == LOW)
+      {
+        Serial.println("IR Detected");
+      }
+
+      else
+      {
+        Serial.println("IR Clear");
+      }
+    }
+
+    break;
+
+  /// @brief NTP
+  case 6:
+    while (true)
+    {
+      localTime();
+      Serial.println(timeResult);
+    }
+
+    break;
+
+  /// @brief Temperature Sensor
+  case 7:
+    while (true)
+    {
+      sprintf(tempResult, "%4.2f", sensor.getObjectTempCelsius());
+
+      Serial.println(tempResult);
+    }
+
+    break;
+
+  default:
+    break;
+  }
+}
+
+/// @section Parts Setup Subroutines
+
+/// @subsection LCD I2C Setup
 void lcdSetup()
 {
   lcd.init();
@@ -101,6 +198,7 @@ void lcdSetup()
   lcd.clear();
 }
 
+/// @subsection Bumper Setup
 void bumperSetup()
 {
   pinMode(bumperPin, OUTPUT);
@@ -108,7 +206,7 @@ void bumperSetup()
   delay(500);
 }
 
-// 指紋傳感器初始化
+/// @subsection Fingerprtint Sensor Setup
 void fingerprintSetup()
 {
   mySerial.begin(57600, SERIAL_8N1, 18, 19); // 使用 GPIO 18 (TX) 和 19 (RX)
@@ -123,7 +221,7 @@ void fingerprintSetup()
   }
 }
 
-/// @subsection Discord WebHook 初始化
+/// @subsection Discord WebHook Setup
 void discordWebHookSetup()
 {
   discord.begin(discordWebhook);
@@ -134,15 +232,15 @@ void discordWebHookSetup()
   bool message_sent = discord.send("Discord WebHook Confirm");
 }
 
-/// @subsection NTP 初始化
+/// @subsection NTP Setup
 void timeSetup()
 {
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
-/// @section 執行模組
+/// @section Parts Function Subroutines
 
-/// @subsection 泵浦運作
+/// @subsection Bumper Work
 void bumperWork()
 {
   digitalWrite(bumperPin, LOW);
@@ -152,12 +250,11 @@ void bumperWork()
   bumperWorked = true;
 }
 
-// 獲取指紋 ID 的副程式，包含狀態檢查和匹配
+/// @subsection Fingerprint Work
 int getFingerprintID()
 {
   uint8_t p = finger.getImage();
 
-  // 檢查是否檢測到手指
   if (p == FINGERPRINT_NOFINGER)
   { // 正確的指紋狀態常量
     Serial.println("未檢測到手指");
@@ -198,7 +295,7 @@ int getFingerprintID()
   }
 }
 
-/// @subsection NTP 讀取時間
+/// @subsection NTP Get Time
 void localTime()
 {
   time_t rawTime;
@@ -211,22 +308,26 @@ void localTime()
   strftime(timeResult, sizeof(timeResult), "%Y-%m-%d %H:%M", info);
 }
 
-/// @subsection 檢測到IR後動作
+/// @subsection Function After IR Sensor Detected
 void functionAfterIR()
 {
+  /// @brief Make Temperature Result A F-String
   sprintf(tempResult, "%4.2f", sensor.getObjectTempCelsius());
 
-  /// @brief 检测到IR信号后执行操作
+  /// @brief LCD Print Temperature Result
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("體溫");
   lcd.setCursor(0, 1);
   lcd.print(tempResult);
 
+  /// @brief Discord Send Time & Temperature Reesult
   discord.send(timeResult);
   discord.send(tempResult);
 
-  delay(50); /// @brief 延迟2秒等待 bumper 检测
+  delay(50);
+
+  /// @brief Make Sure Bumper Will Work Only One Time Per Detect
   bumperWorked = false;
 
   while (!bumperWorked)

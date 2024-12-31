@@ -76,13 +76,20 @@ void loop()
     localTime();
 
     /// @brief Wait For IR Signal
-    while (digitalRead(irSensorPin) != LOW)
+    for ( int i = 0;  i < 15; i ++ )
     {
-      delay(100);
-    }
+      if ( digitalRead ( irSensorPin ) != LOW )
+      {
+        /// @brief Other Component Work
+        functionAfterIR ();
+        break;
+      }
 
-    /// @brief Other Component Work
-    functionAfterIR();
+      else
+      {
+        delay ( 1000 );
+      }
+    }
 
     delay(1000);
   }

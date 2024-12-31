@@ -75,8 +75,9 @@ void loop()
     /// @brief Get Current Time
     localTime();
 
-    /// @brief Wait For IR Signal
-    for (int i = 0; i < 15; i++)
+    /// @brief Wait IR Signal For 15 Secends
+    timer = 0;
+    while ( timer <= 15 )
     {
       if (digitalRead(irSensorPin) != LOW)
       {
@@ -88,6 +89,7 @@ void loop()
       else
       {
         delay(1000);
+        timer ++;
       }
     }
 
